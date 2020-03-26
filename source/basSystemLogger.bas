@@ -13,6 +13,8 @@ Global Const cLogWarning = 50
 Global Const cLogError = 30
 Global Const cLogCritical = 1
 
+Const cLineBreak = vbCr & vbLf
+
 'current log level - decreasing log level means decreasing amount of messages
 Global Const cCurrentLogLevel = 100
 
@@ -65,24 +67,14 @@ End Sub
 '-------------------------------------------------------------
 Public Sub log_error(pstrFunctionName As String, Optional pstrLogMsg As Variant)
 
-    Dim intLogLevel As Integer      'current log level
     Dim strLog As String            'complete log messages
-    Dim strError As String          'system error message from Err object
     
-    strError = Err.Description
-    'start log messages with time
-    strLog = Time
-    'log level = error
-    strLog = strLog & " error:"
-    'add caller name
-    strLog = strLog & "error in " & pstrFunctionName & ": "
-    'if given add custom log message
+    strLog = Time & " error:" & cLineBreak & _
+                vbTab & "source:" & vbTab & Err.Source & cLineBreak & _
+                vbTab & "caller:" & vbTab & pstrFunctionName & cLineBreak & _
+                vbTab & "desc:" & vbTab & Err.Description & cLineBreak
     If Not IsMissing(pstrLogMsg) Then
-        strLog = strLog & " " & pstrLogMsg
-    Else
-        'use message from Err object
-        On Error Resume Next
-        strLog = strLog & " " & strError
+        strLog = strLog & vbTab & "custom:" & vbTab & pstrLogMsg
     End If
     Debug.Print strLog
 End Sub
