@@ -36,7 +36,7 @@ Public Sub testScenarios()
                        "When the rule is applied to the presentation", _
                        "Then a comment about the rule validation is added to the second slide" _
                     )
-    basCuke.runScenario scenario, Me
+    basTestRunner.runScenario scenario, Me
     
     Exit Sub
 
@@ -44,60 +44,25 @@ error_handler:
     basSystemLogger.log_error "clsFeatureFontWhiteList.runTest"
 End Sub
 '-------------------------------------------------------------
-' Description   : provide given pre-conditions
-' Parameter     :
+' Description   : execute a single test step
+' Parameter     : pcolStepProps     - all properties of the current step, e.g. type, head, body, line
 '-------------------------------------------------------------
-Public Sub runGivenSteps(pstrGiven As String)
+Public Sub runStep(pcolStepProps As Collection)
 
-    Dim strGiven As String
+    Dim strStepType As String
     
     On Error GoTo error_handler
-    strGiven = Replace(pstrGiven, "And", "Given", 1, 1)
-    Select Case pstrGiven
     
-    Case Else
-        basCuke.missingTest pstrGiven, Me
+    Select Case pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+        Case "Given a font white list rule listing Arial"
+            Debug.Print "pending"
+            
+        Case Else
+            basTestRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
     End Select
     
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "clsFeatureFontWhiteList.runGivenSteps " & pstrGiven
+    basSystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
 End Sub
-'-------------------------------------------------------------
-' Description   : execute when statements
-' Parameter     :
-'-------------------------------------------------------------
-Public Sub runWhenSteps(pstrWhen As String)
-
-    On Error GoTo error_handler
-    Select Case pstrWhen
-    
-    Case Else
-        basCuke.missingTest pstrWhen, Me
-    End Select
-    
-    Exit Sub
-
-error_handler:
-    basSystemLogger.log_error "clsFeatureFontWhiteList.runWhenSteps " & pstrWhen
-End Sub
-'-------------------------------------------------------------
-' Description   : execute then statements
-' Parameter     :
-'-------------------------------------------------------------
-Public Sub runThenSteps(pstrThen As String)
-
-    On Error GoTo error_handler
-    Select Case pstrThen
-    
-    Case Else
-        basCuke.missingTest pstrThen, Me
-    End Select
-    
-    Exit Sub
-
-error_handler:
-    basSystemLogger.log_error "clsFeatureFontWhiteList.runThenSteps " & pstrThen
-End Sub
-
