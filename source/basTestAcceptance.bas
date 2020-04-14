@@ -20,7 +20,7 @@ Public Sub runAllTests()
 
     On Error GoTo error_handler
     Set objRuleValidator = New clsFeatureFontWhiteList
-    objRuleValidator.testScenarios
+    objRuleValidator.test_scenarios
 
     Exit Sub
 

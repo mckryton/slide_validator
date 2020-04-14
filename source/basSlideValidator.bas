@@ -11,50 +11,30 @@ Const mcRuleCheckInitials = "bot"
 
 'Options
 Option Explicit
-'-------------------------------------------------------------
-' Description   : add rule violation message as ppt comment
-' Parameter     : psldValidatedSlide    - the current validated slide
-'                 pcolViolationMessages - feedback from the rule check
-'-------------------------------------------------------------
-Public Sub addViolation(psldValidatedSlide As Slide, pcolViolationMessages As Collection)
-    
-    Dim varViolationMsg As Variant
-    Dim lngCommentPosX As Long
-    
-    On Error GoTo error_handler
-    lngCommentPosX = 10
-    For Each varViolationMsg In pcolViolationMessages
-        psldValidatedSlide.Comments.Add 10, 10, mcRuleCheckAuthor, mcRuleCheckInitials, varViolationMsg
-    Next
-    lngCommentPosX = lngCommentPosX + 10
-    Exit Sub
 
-error_handler:
-    basSystemLogger.log_error "basSlideValidator.addViolation"
-End Sub
 '-------------------------------------------------------------
 ' Description   : apply rules to slides of the active presentation
 ' Parameter     :
 '-------------------------------------------------------------
-Public Sub runSlideValidator()
+Public Sub run_slide_validator(Optional ppresPresentation, Optional pvarRules)
 
     Dim sldCurrent As Slide
-    Dim colViolationMessages As Collection
 
     On Error GoTo error_handler
+    If IsMissing(ppresPresentation) Then
+        Set ppresPresentation = ActivePresentation
+    End If
+    If IsMissing(pvarRules) Then
+        'TODO: add function to setup all rules
+        pvarRules = Array()
+    End If
+    'comments from earlier validations may not reflect the current content
     basSlideValidator.cleanupViolationMessages
-    For Each sldCurrent In ActivePresentation.Slides
-        'ignore hidden slides
+    For Each sldCurrent In ppresPresentation.Slides
+        'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
             basSystemLogger.log "apply rules to slide " & sldCurrent.SlideIndex
-            'TODO: apply rules
-            Set colViolationMessages = New Collection
-            colViolationMessages.Add "message six"
-            colViolationMessages.Add "message five"
-            If colViolationMessages.Count > 0 Then
-                addViolation sldCurrent, colViolationMessages
-            End If
-            Set colViolationMessages = Nothing
+            apply_rules pvarRules, sldCurrent
         Else
             basSystemLogger.log "skip hidden slide " & sldCurrent.SlideIndex
         End If
@@ -64,6 +44,40 @@ Public Sub runSlideValidator()
 error_handler:
     basSystemLogger.log_error "basSlideValidator.runRuleCheck"
 End Sub
+
+Private Function apply_rules(pvarRules As Variant, psldCurrentSlide As Slide)
+
+    Dim varRule As Variant
+    Dim strValidationResult As String
+    
+    On Error GoTo error_handler
+    For Each varRule In pvarRules
+        strValidationResult = varRule.apply_rule(psldCurrentSlide)
+        If Len(Trim(strValidationResult)) > 0 Then
+           add_violation psldCurrentSlide, strValidationResult
+        End If
+    Next
+    Exit Function
+    
+error_handler:
+    basSystemLogger.log_error "basSlideValidator.apply_rule"
+End Function
+
+
+Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As String)
+    
+    Dim lngCommentPosX As Long
+    
+    On Error GoTo error_handler
+    'improve visibilty by puting all comments for violation messages in a row
+    lngCommentPosX = 10 * (psldValidatedSlide.Comments.Count + 1)
+    psldValidatedSlide.Comments.Add lngCommentPosX, 10, mcRuleCheckAuthor, mcRuleCheckInitials, pstrViolationMessage
+    Exit Sub
+
+error_handler:
+    basSystemLogger.log_error "basSlideValidator.add_violation"
+End Sub
+
 '-------------------------------------------------------------
 ' Description   : delete old violation messages
 ' Parameter     :

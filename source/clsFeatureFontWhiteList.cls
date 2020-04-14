@@ -16,14 +16,13 @@ Attribute VB_Exposed = False
 Const tags = "@debug"
 
 'Declare variables
+Dim mobjRuleFontWhiteList As clsRuleFontWhiteList
+Dim mpreTestPresentation As Presentation
 
 'Options
 Option Explicit
-'-------------------------------------------------------------
-' Description   : run all acceptance tests
-' Parameter     :
-'-------------------------------------------------------------
-Public Sub testScenarios()
+
+Public Sub test_scenarios()
 
     Dim scenario As Variant
 
@@ -36,33 +35,51 @@ Public Sub testScenarios()
                        "When the rule is applied to the presentation", _
                        "Then a comment about the rule validation is added to the second slide" _
                     )
-    basTestRunner.runScenario scenario, Me
+    basTestScenarioRunner.runScenario scenario, Me
     
     Exit Sub
 
 error_handler:
     basSystemLogger.log_error "clsFeatureFontWhiteList.runTest"
 End Sub
-'-------------------------------------------------------------
-' Description   : execute a single test step
-' Parameter     : pcolStepProps     - all properties of the current step, e.g. type, head, body, line
-'-------------------------------------------------------------
-Public Sub runStep(pcolStepProps As Collection)
 
-    Dim strStepType As String
+Public Sub run_step(pcolStepProps As Collection)
     
     On Error GoTo error_handler
-    
-    Select Case pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+    Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
         Case "Given a font white list rule listing Arial"
-            Debug.Print "pending"
-            
+            Set mobjRuleFontWhiteList = New clsRuleFontWhiteList
+            mobjRuleFontWhiteList.font_white_list.Add "Arial"
+        Case "Given a new presentation"
+            Set mpreTestPresentation = Application.Presentations.Add
+        Case "Given it contains a first slide with a textbox using Arial"
+            add_slide_with_textbox mpreTestPresentation, "Arial"
+        Case "Given it contains a second slide with a textbox using Times New Roman"
+            add_slide_with_textbox mpreTestPresentation, "Times New Roman"
+        Case "When the rule is applied to the presentation"
+            basSlideValidator.run_slide_validator mpreTestPresentation, Array(mobjRuleFontWhiteList)
         Case Else
-            basTestRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            basTestScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
     End Select
     
     Exit Sub
 
 error_handler:
     basSystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+End Sub
+
+Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
+
+    Dim slide_with_textbox As Slide
+    Dim textbox As Shape
+    
+    On Error GoTo error_handler
+    Set slide_with_textbox = pprePresentation.Slides.AddSlide(1, pprePresentation.SlideMaster.CustomLayouts(7))
+    Set textbox = slide_with_textbox.Shapes.AddTextbox(msoTextOrientationHorizontal, 200, 200, 400, 200)
+    textbox.TextFrame.TextRange.Font.Name = pstrFontName
+    textbox.TextFrame.TextRange.Text = "This text is using " & pstrFontName & " as font."
+    Exit Sub
+    
+error_handler:
+    basSystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
 End Sub
