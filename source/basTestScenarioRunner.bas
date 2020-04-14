@@ -1,6 +1,6 @@
-Attribute VB_Name = "basTestRunner"
+Attribute VB_Name = "basTestScenarioRunner"
 '------------------------------------------------------------------------
-' Description  : cuke alike test support functions
+' Description  : execute test steps for Gherkin scenarios / examples
 '------------------------------------------------------------------------
 '
 'Declarations
@@ -57,7 +57,7 @@ Public Sub runScenario(pvarScenario As Variant, pobjCaller As Variant)
 syntax_error:
     basSystemLogger.log_error "syntax error: " & strSyntaxErrMsg & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
 error_handler:
-    basSystemLogger.log_error "basTestRunner.runScenario", Join(pvarScenario, vbTab & vbCr & vbLf)
+    basSystemLogger.log_error "basTestScenarioRunner.runScenario", Join(pvarScenario, vbTab & vbCr & vbLf)
 End Sub
 '-------------------------------------------------------------
 ' Description   : tell about missing test for a step definition
@@ -72,7 +72,7 @@ Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basTestRunner.missingTest " & pstrStepDefinition
+    basSystemLogger.log_error "basTestScenarioRunner.missingTest " & pstrStepDefinition
 End Sub
 
 
@@ -106,5 +106,5 @@ Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Intege
     Exit Function
 
 error_handler:
-    basSystemLogger.log_error "basTestRunner.getScenarioLine"
+    basSystemLogger.log_error "basTestScenarioRunner.getScenarioLine"
 End Function
