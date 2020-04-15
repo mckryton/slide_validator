@@ -1,4 +1,4 @@
-Attribute VB_Name = "basTestUnit"
+Attribute VB_Name = "TUnit"
 '------------------------------------------------------------------------
 ' Description  : starting point to run all unit tests
 '------------------------------------------------------------------------

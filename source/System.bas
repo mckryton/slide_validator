@@ -1,4 +1,4 @@
-Attribute VB_Name = "basSystem"
+Attribute VB_Name = "System"
 '------------------------------------------------------------------------
 ' Description  : extends system related functions
 '------------------------------------------------------------------------
@@ -63,10 +63,10 @@ Private Sub exportCode()
                 strSuffix = "txt"
         End Select
         vcomSource.Export strPath & strSeparator & vcomSource.Name & "." & strSuffix
-        basSystemLogger.log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
+        SystemLogger.log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
     Next
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basSystem.exportCode"
+    SystemLogger.log_error "System.exportCode"
 End Sub

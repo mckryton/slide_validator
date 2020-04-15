@@ -1,27 +1,19 @@
-Attribute VB_Name = "basTestScenarioRunner"
+Attribute VB_Name = "TScenarioRunner"
 '------------------------------------------------------------------------
 ' Description  : execute test steps for Gherkin scenarios / examples
 '------------------------------------------------------------------------
-'
-'Declarations
 
+Option Explicit
 
-'Declare variables
 Dim mStopTestExecution As Boolean
 
-'Options
-Option Explicit
-'-------------------------------------------------------------
-' Description   : run all acceptance tests
-' Parameter     : pvarScenario  - Gherkin scenario as variant array of strings
-'                 pobjCaller    - reference to the calling test class
-'-------------------------------------------------------------
-Public Sub runScenario(pvarScenario As Variant, pobjCaller As Variant)
+Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
 
     Dim intLineIndex As Integer
     Dim colLine As Collection
     Dim strSyntaxErrMsg As String
     Dim strLastStepType As String
+    Dim step_result As String
 
     On Error GoTo error_handler
     mStopTestExecution = False
@@ -45,8 +37,8 @@ Public Sub runScenario(pvarScenario As Variant, pobjCaller As Variant)
         colLine.Add strLastStepType, "step_type"
         Select Case colLine.Item("step_type")
         Case "Given", "When", "Then"
-            pobjCaller.run_step colLine
-            'TODO: print step + test result
+            step_result = pobjCaller.run_step(colLine)
+            Debug.Print vbTab & colLine.Item("line"), step_result
         Case Else
             strSyntaxErrMsg = "unexpected step type " & colLine.Item("step_type")
             GoTo syntax_error
@@ -59,9 +51,9 @@ Public Sub runScenario(pvarScenario As Variant, pobjCaller As Variant)
     
 'TODO: refactor add function for raising syntax error
 syntax_error:
-    basSystemLogger.log_error "syntax error: " & strSyntaxErrMsg & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
+    SystemLogger.log_error "syntax error: " & strSyntaxErrMsg & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
 error_handler:
-    basSystemLogger.log_error "basTestScenarioRunner.runScenario", Join(pvarScenario, vbTab & vbCr & vbLf)
+    SystemLogger.log_error "TScenarioRunner.runScenario", Join(pvarScenario, vbTab & vbCr & vbLf)
 End Sub
 '-------------------------------------------------------------
 ' Description   : tell about missing test for a step definition
@@ -76,7 +68,7 @@ Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basTestScenarioRunner.missingTest " & pstrStepDefinition
+    SystemLogger.log_error "TScenarioRunner.missingTest " & pstrStepDefinition
 End Sub
 
 
@@ -110,5 +102,5 @@ Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Intege
     Exit Function
 
 error_handler:
-    basSystemLogger.log_error "basTestScenarioRunner.getScenarioLine"
+    SystemLogger.log_error "TScenarioRunner.getScenarioLine"
 End Function

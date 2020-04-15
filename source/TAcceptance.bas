@@ -1,4 +1,4 @@
-Attribute VB_Name = "basTestAcceptance"
+Attribute VB_Name = "TAcceptance"
 '------------------------------------------------------------------------
 ' Description  : test all features
 '------------------------------------------------------------------------
@@ -14,18 +14,20 @@ Option Explicit
 ' Description   : run all acceptance tests
 ' Parameter     :
 '-------------------------------------------------------------
-Public Sub runAllTests()
+Public Sub run_all_tests()
 
-    Dim objRuleValidator As Object
+    Dim all_features As Variant
+    Dim feature As Variant
 
     On Error GoTo error_handler
-    Set objRuleValidator = New clsFeatureFontWhiteList
-    objRuleValidator.test_scenarios
-
+    all_features = Array(New Feature_FontWhiteList)
+    For Each feature In all_features
+        feature.test_scenarios
+    Next
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basTestAcceptance.runAllTests"
+    SystemLogger.log_error "TAcceptance.run_all_tests"
 End Sub
 
 

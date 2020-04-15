@@ -1,4 +1,4 @@
-Attribute VB_Name = "basSystemLogger"
+Attribute VB_Name = "SystemLogger"
 '------------------------------------------------------------------------
 ' Description  : contains all global constants
 '------------------------------------------------------------------------
@@ -16,7 +16,7 @@ Global Const cLogCritical = 1
 Const cLineBreak = vbCr & vbLf
 
 'current log level - decreasing log level means decreasing amount of messages
-Global Const cCurrentLogLevel = 100
+Global Const cCurrentLogLevel = 30
 
 '-------------------------------------------------------------
 ' Description   : prints log messages to direct window
@@ -85,9 +85,9 @@ End Sub
 Public Sub logd(pstrLogMsg As String)
 
     On Error GoTo error_handler
-    basSystemLogger.log pstrLogMsg, cLogDebug
+    SystemLogger.log pstrLogMsg, cLogDebug
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basSystem.logd"
+    SystemLogger.log_error "System.logd"
 End Sub

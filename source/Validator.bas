@@ -1,4 +1,4 @@
-Attribute VB_Name = "basSlideValidator"
+Attribute VB_Name = "Validator"
 '------------------------------------------------------------------------
 ' Description  : apply rules to active presentation, add violations as comment
 '------------------------------------------------------------------------
@@ -29,20 +29,20 @@ Public Sub run_slide_validator(Optional ppresPresentation, Optional pvarRules)
         pvarRules = Array()
     End If
     'comments from earlier validations may not reflect the current content
-    basSlideValidator.cleanupViolationMessages
+    Validator.cleanupViolationMessages
     For Each sldCurrent In ppresPresentation.Slides
         'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
-            basSystemLogger.log "apply rules to slide " & sldCurrent.SlideIndex
+            SystemLogger.log "apply rules to slide " & sldCurrent.SlideIndex
             apply_rules pvarRules, sldCurrent
         Else
-            basSystemLogger.log "skip hidden slide " & sldCurrent.SlideIndex
+            SystemLogger.log "skip hidden slide " & sldCurrent.SlideIndex
         End If
     Next
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basSlideValidator.runRuleCheck"
+    SystemLogger.log_error "Validator.runRuleCheck"
 End Sub
 
 Private Function apply_rules(pvarRules As Variant, psldCurrentSlide As Slide)
@@ -60,7 +60,7 @@ Private Function apply_rules(pvarRules As Variant, psldCurrentSlide As Slide)
     Exit Function
     
 error_handler:
-    basSystemLogger.log_error "basSlideValidator.apply_rule"
+    SystemLogger.log_error "Validator.apply_rule"
 End Function
 
 
@@ -75,7 +75,7 @@ Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As St
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basSlideValidator.add_violation"
+    SystemLogger.log_error "Validator.add_violation"
 End Sub
 
 '-------------------------------------------------------------
@@ -89,7 +89,7 @@ Public Sub cleanupViolationMessages()
     Dim colOldMessages As Collection      'comment objects for old violation messages
     
     On Error GoTo error_handler
-    basSystemLogger.log "delete old violation messages"
+    SystemLogger.log "delete old violation messages"
     For Each sldCurrent In ActivePresentation.Slides
         'ignore hidden slides
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
@@ -109,5 +109,5 @@ Public Sub cleanupViolationMessages()
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "basSlideValidator.cleanupViolationMessages"
+    SystemLogger.log_error "Validator.cleanupViolationMessages"
 End Sub

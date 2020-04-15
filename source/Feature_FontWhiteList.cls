@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "clsFeatureFontWhiteList"
+Attribute VB_Name = "Feature_FontWhiteList"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -16,7 +16,7 @@ Attribute VB_Exposed = False
 Const tags = "@debug"
 
 'Declare variables
-Dim mobjRuleFontWhiteList As clsRuleFontWhiteList
+Dim mobjRuleFontWhiteList As Rule_FontWhiteList
 Dim mpreTestPresentation As Presentation
 
 'Options
@@ -35,20 +35,21 @@ Public Sub test_scenarios()
                        "When the rule is applied to the presentation", _
                        "Then a comment about the rule validation is added to the second slide" _
                     )
-    basTestScenarioRunner.runScenario scenario, Me
-    
+    TScenarioRunner.run_scenario scenario, Me
     Exit Sub
 
 error_handler:
-    basSystemLogger.log_error "clsFeatureFontWhiteList.runTest"
+    SystemLogger.log_error "clsFeatureFontWhiteList.runTest"
 End Sub
 
-Public Sub run_step(pcolStepProps As Collection)
+Public Function run_step(pcolStepProps As Collection) As String
+    
+    Dim step_result As String
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
         Case "Given a font white list rule listing Arial"
-            Set mobjRuleFontWhiteList = New clsRuleFontWhiteList
+            Set mobjRuleFontWhiteList = New Rule_FontWhiteList
             mobjRuleFontWhiteList.font_white_list.Add "Arial"
         Case "Given a new presentation"
             Set mpreTestPresentation = Application.Presentations.Add
@@ -57,16 +58,19 @@ Public Sub run_step(pcolStepProps As Collection)
         Case "Given it contains a second slide with a textbox using Times New Roman"
             add_slide_with_textbox mpreTestPresentation, "Times New Roman"
         Case "When the rule is applied to the presentation"
-            basSlideValidator.run_slide_validator mpreTestPresentation, Array(mobjRuleFontWhiteList)
+            Validator.run_slide_validator mpreTestPresentation, Array(mobjRuleFontWhiteList)
+        Case "Then a comment about tshe rule validation is added to the second slide"
+            TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 0
+            TSpec.expect(mpreTestPresentation.Slides(2).Comments.Count).to_be 1
         Case Else
-            basTestScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
     End Select
-    
-    Exit Sub
+    run_step = "OK"
+    Exit Function
 
 error_handler:
-    basSystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
-End Sub
+    SystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+End Function
 
 Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
 
@@ -81,5 +85,5 @@ Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontNam
     Exit Sub
     
 error_handler:
-    basSystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
+    SystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
 End Sub
