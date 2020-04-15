@@ -1,19 +1,9 @@
 Attribute VB_Name = "TAcceptance"
 '------------------------------------------------------------------------
-' Description  : test all features
+' Description  : starting point for running test sets for acceptance tests
 '------------------------------------------------------------------------
-'
-'Declarations
-
-
-'Declare variables
-
-'Options
 Option Explicit
-'-------------------------------------------------------------
-' Description   : run all acceptance tests
-' Parameter     :
-'-------------------------------------------------------------
+
 Public Sub run_all_tests()
 
     Dim all_features As Variant
@@ -22,7 +12,10 @@ Public Sub run_all_tests()
     On Error GoTo error_handler
     all_features = Array(New Feature_FontWhiteList)
     For Each feature In all_features
+        Debug.Print "Feature: " & TypeName(feature)
+        Debug.Print vbTab & feature.description & vbLf
         feature.test_scenarios
+        Set feature = Nothing
     Next
     Exit Sub
 

@@ -1,16 +1,9 @@
 Attribute VB_Name = "TUnit"
 '------------------------------------------------------------------------
-' Description  : starting point to run all unit tests
+' Description  : starting point for running test sets for unit tests
 '------------------------------------------------------------------------
-'
-'Declarations
-
-
-'Declare variables
-Dim mStopTestExecution As Boolean
-
-'Options
 Option Explicit
 
-'TODO: add tests for reading rule parameters from rule config slides
+Public Sub run_all_tests()
 
+End Sub

@@ -24,7 +24,7 @@ Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
         strSyntaxErrMsg = "can't find scenario start"
         GoTo syntax_error
     Else
-        Debug.Print colLine.Item("line")
+        Debug.Print vbTab & colLine.Item("line")
     End If
     'TODO: refactor add function execute step
     intLineIndex = intLineIndex + 1
@@ -39,10 +39,11 @@ Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
         Case "Given", "When", "Then"
             step_result = pobjCaller.run_step(colLine)
             If step_result = "OK" Then
-                Debug.Print step_result, vbTab & colLine.Item("line")
+                Debug.Print vbTab & step_result, vbTab & colLine.Item("line")
             Else
-                Debug.Print "FAILED", vbTab & colLine.Item("line")
+                Debug.Print vbTab & "FAILED", vbTab & colLine.Item("line")
                 Debug.Print step_result
+                End
             End If
         Case Else
             strSyntaxErrMsg = "unexpected step type " & colLine.Item("step_type")

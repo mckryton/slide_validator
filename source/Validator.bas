@@ -2,20 +2,11 @@ Attribute VB_Name = "Validator"
 '------------------------------------------------------------------------
 ' Description  : apply rules to active presentation, add violations as comment
 '------------------------------------------------------------------------
-'
-'Declarations
+Option Explicit
+
 Const mcRuleCheckAuthor = "Slide Validator"
 Const mcRuleCheckInitials = "bot"
 
-'Declare variables
-
-'Options
-Option Explicit
-
-'-------------------------------------------------------------
-' Description   : apply rules to slides of the active presentation
-' Parameter     :
-'-------------------------------------------------------------
 Public Sub run_slide_validator(Optional ppresPresentation, Optional pvarRules)
 
     Dim sldCurrent As Slide
@@ -29,7 +20,7 @@ Public Sub run_slide_validator(Optional ppresPresentation, Optional pvarRules)
         pvarRules = Array()
     End If
     'comments from earlier validations may not reflect the current content
-    Validator.cleanupViolationMessages
+    Validator.cleanup_violation_messages
     For Each sldCurrent In ppresPresentation.Slides
         'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
@@ -63,13 +54,12 @@ error_handler:
     SystemLogger.log_error "Validator.apply_rule"
 End Function
 
-
 Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As String)
     
     Dim lngCommentPosX As Long
     
     On Error GoTo error_handler
-    'improve visibilty by puting all comments for violation messages in a row
+    'improve visibilty by putting all comments for violation messages in a row
     lngCommentPosX = 10 * (psldValidatedSlide.Comments.Count + 1)
     psldValidatedSlide.Comments.Add lngCommentPosX, 10, mcRuleCheckAuthor, mcRuleCheckInitials, pstrViolationMessage
     Exit Sub
@@ -78,11 +68,7 @@ error_handler:
     SystemLogger.log_error "Validator.add_violation"
 End Sub
 
-'-------------------------------------------------------------
-' Description   : delete old violation messages
-' Parameter     :
-'-------------------------------------------------------------
-Public Sub cleanupViolationMessages()
+Private Sub cleanup_violation_messages()
 
     Dim sldCurrent As Slide
     Dim comCurrentMsg As Comment
@@ -109,5 +95,5 @@ Public Sub cleanupViolationMessages()
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Validator.cleanupViolationMessages"
+    SystemLogger.log_error "Validator.cleanup_violation_messages"
 End Sub

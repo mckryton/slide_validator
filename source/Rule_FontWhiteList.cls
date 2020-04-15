@@ -24,5 +24,36 @@ Public Property Get font_white_list() As Collection
 End Property
 
 Public Function apply_rule(psldCurrentSlide As Slide) As String
-    apply_rule = "PENDING rule validation result for font white list"
+
+    Dim shape As shape
+    Dim violations As String
+    
+    violations = ""
+    For Each shape In psldCurrentSlide.Shapes
+        If shape.TextFrame.HasText Then
+            If Not System.existsItem(shape.TextFrame2.TextRange.Font.Name, Me.font_white_list) Then
+                violations = violations & "illegal font >" & shape.TextFrame2.TextRange.Font.Name & "< in shape " & shape.Name & vbCrLf
+            End If
+        End If
+    Next
+    apply_rule = violations
 End Function
+
+Public Sub create_white_list(pFontWhiteList_Config_String As String)
+    
+    Dim white_list_config As Variant
+    Dim font_name As Variant
+    
+    Me.clear_white_list
+    white_list_config = Split(pFontWhiteList_Config_String, ",")
+    For Each font_name In white_list_config
+        Me.font_white_list.Add Trim(font_name), Trim(font_name)
+    Next
+End Sub
+
+Public Sub clear_white_list()
+    
+    Do While Me.font_white_list.Count > 0
+        Me.font_white_list.Remove 0
+    Loop
+End Sub

@@ -19,7 +19,7 @@ Public Sub to_be(pvarExpectedValue)
         matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
                             vbTab & "found:" & vbTab & vbTab & ">" & Me.given_value & "<" & vbLf & _
                             vbTab & "expected:" & vbTab & ">" & pvarExpectedValue & "<"
-        Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Description:=matcher_fail_msg
+        Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, description:=matcher_fail_msg
     End If
 End Sub
 
