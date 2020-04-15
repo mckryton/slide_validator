@@ -59,7 +59,7 @@ Public Function run_step(pcolStepProps As Collection) As String
             add_slide_with_textbox mpreTestPresentation, "Times New Roman"
         Case "When the rule is applied to the presentation"
             Validator.run_slide_validator mpreTestPresentation, Array(mobjRuleFontWhiteList)
-        Case "Then a comment about tshe rule validation is added to the second slide"
+        Case "Then a comment about the rule validation is added to the second slide"
             TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 0
             TSpec.expect(mpreTestPresentation.Slides(2).Comments.Count).to_be 1
         Case Else
@@ -69,7 +69,14 @@ Public Function run_step(pcolStepProps As Collection) As String
     Exit Function
 
 error_handler:
-    SystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+    If Err.Number = TSpec.ERR_ID_EXPECTATION_FAILED Then
+        TScenarioRunner.stop_test
+        run_step = Err.Description
+        Err.Clear
+        Exit Function
+    Else
+        SystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+    End If
 End Function
 
 Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)

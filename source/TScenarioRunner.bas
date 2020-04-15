@@ -5,7 +5,7 @@ Attribute VB_Name = "TScenarioRunner"
 
 Option Explicit
 
-Dim mStopTestExecution As Boolean
+Dim mTestStopped As Boolean
 
 Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
 
@@ -16,7 +16,7 @@ Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
     Dim step_result As String
 
     On Error GoTo error_handler
-    mStopTestExecution = False
+    mTestStopped = False
     intLineIndex = 0
     Set colLine = getScenarioLine(pvarScenario, intLineIndex)
     'TODO: refactor add functioon for print scenario title
@@ -28,8 +28,8 @@ Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
     End If
     'TODO: refactor add function execute step
     intLineIndex = intLineIndex + 1
-    Set colLine = getScenarioLine(pvarScenario, intLineIndex)
     Do
+        Set colLine = getScenarioLine(pvarScenario, intLineIndex)
         If colLine.Item("line_head") <> "And" Then
             strLastStepType = colLine.Item("line_head")
         End If
@@ -38,14 +38,18 @@ Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
         Select Case colLine.Item("step_type")
         Case "Given", "When", "Then"
             step_result = pobjCaller.run_step(colLine)
-            Debug.Print vbTab & colLine.Item("line"), step_result
+            If step_result = "OK" Then
+                Debug.Print step_result, vbTab & colLine.Item("line")
+            Else
+                Debug.Print "FAILED", vbTab & colLine.Item("line")
+                Debug.Print step_result
+            End If
         Case Else
             strSyntaxErrMsg = "unexpected step type " & colLine.Item("step_type")
             GoTo syntax_error
         End Select
         intLineIndex = intLineIndex + 1
-        Set colLine = getScenarioLine(pvarScenario, intLineIndex)
-    Loop Until mStopTestExecution = True Or intLineIndex = UBound(pvarScenario)
+    Loop Until TScenarioRunner.TestStopped = True Or intLineIndex > UBound(pvarScenario)
 
     Exit Sub
     
@@ -63,7 +67,7 @@ End Sub
 Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
 
     On Error GoTo error_handler
-    mStopTestExecution = True
+    TScenarioRunner.TestStopped = True
     Debug.Print vbCr & vbLf & "missing test step for >" & pstrStepDefinition & "<" & vbCr & vbLf & "  rule validator: " & TypeName(pobjCaller)
     Exit Sub
 
@@ -104,3 +108,15 @@ Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Intege
 error_handler:
     SystemLogger.log_error "TScenarioRunner.getScenarioLine"
 End Function
+
+Public Property Get TestStopped() As Boolean
+    TestStopped = mTestStopped
+End Property
+
+Private Property Let TestStopped(ByVal pTestStopped As Boolean)
+    mTestStopped = pTestStopped
+End Property
+
+Public Sub stop_test()
+    TScenarioRunner.TestStopped = True
+End Sub

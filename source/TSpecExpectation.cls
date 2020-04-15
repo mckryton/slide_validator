@@ -11,17 +11,17 @@ Option Explicit
 
 Dim mvarGivenValue As Variant
 
-Public Function to_be(pvarExpectedValue) As Boolean
+Public Sub to_be(pvarExpectedValue)
 
-    If Me.given_value = pvarExpectedValue Then
-        to_be = True
-    Else
-        Debug.Print vbTab & "missed expectation"
-        Debug.Print "", "found:", ">" & Me.given_value & "<"
-        Debug.Print "", "expected:", ">" & pvarExpectedValue & "<"
-        to_be = True = False
+    Dim matcher_fail_msg As String
+    
+    If Me.given_value <> pvarExpectedValue Then
+        matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
+                            vbTab & "found:" & vbTab & vbTab & ">" & Me.given_value & "<" & vbLf & _
+                            vbTab & "expected:" & vbTab & ">" & pvarExpectedValue & "<"
+        Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Description:=matcher_fail_msg
     End If
-End Function
+End Sub
 
 Public Property Get given_value() As Variant
     given_value = mvarGivenValue
