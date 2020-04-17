@@ -101,8 +101,67 @@ End Sub
 Public Function read_config(pRuleName As String, Optional pConfigPresentation) As Collection
     
     Dim rule_config As Collection
-
+    Dim config_presentation As Presentation
+    Dim config_slide As Slide
+    Dim config_table As Table
+    
     Set rule_config = New Collection
-
+    If IsMissing(pConfigPresentation) Then
+        Set config_presentation = Presentations("SlideValidator.pptm")
+    Else
+        Set config_presentation = pConfigPresentation
+    End If
+    Set config_slide = get_config_slide(pRuleName, config_presentation)
+    If TypeName(config_slide) <> "Nothing" Then
+        Set config_table = get_config_table(config_slide)
+        If TypeName(config_table) <> "Nothing" Then
+            Set rule_config = read_config_from_table(config_table)
+        End If
+    End If
     Set read_config = rule_config
 End Function
+
+Private Function get_config_slide(pstrRuleName As String, pConfigPresentation As Presentation) As Slide
+
+    Dim config_slide As Slide
+    Dim slide_title As String
+    
+    For Each config_slide In pConfigPresentation.Slides
+        slide_title = ""
+        On Error Resume Next
+        slide_title = Trim(config_slide.Shapes.Title.TextFrame.TextRange.Text)
+        If slide_title = pstrRuleName Then
+            Set get_config_slide = config_slide
+            Exit Function
+        End If
+    Next
+    Set get_config_slide = Nothing
+End Function
+
+Private Function get_config_table(pConfigSlide As Slide) As Table
+
+    Dim config_shape As shape
+    
+    For Each config_shape In pConfigSlide.Shapes
+        If config_shape.HasTable Then
+            Set get_config_table = config_shape.Table
+            Exit Function
+        End If
+    Next
+    Set get_config_table = Nothing
+End Function
+
+Private Function read_config_from_table(pConfigTable As Table) As Collection
+
+    Dim config_row As Row
+    Dim row_nr As Long
+    Dim config_parameters As Collection
+    
+    Set config_parameters = New Collection
+    For row_nr = 2 To pConfigTable.Rows.Count
+        Set config_row = pConfigTable.Rows(row_nr)
+        config_parameters.Add Trim(config_row.Cells(2).shape.TextFrame.TextRange), Trim(config_row.Cells(1).shape.TextFrame.TextRange)
+    Next
+    Set read_config_from_table = config_parameters
+End Function
+

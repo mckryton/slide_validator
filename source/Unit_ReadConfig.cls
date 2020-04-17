@@ -106,7 +106,10 @@ Public Function create_config_slide(pRuleName As String) As Slide
     Dim config_slide As Slide
     
     Set config_slide = mTestPresentation.Slides.AddSlide(1, mTestPresentation.SlideMaster.CustomLayouts(6))
+    'todo: remove next line
+    mTestPresentation.Slides.AddSlide 1, mTestPresentation.SlideMaster.CustomLayouts(7)
     config_slide.Shapes.Title.TextFrame.TextRange.Text = pRuleName
+    config_slide.Name = pRuleName
     Set create_config_slide = config_slide
 End Function
 
