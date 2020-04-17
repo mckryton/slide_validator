@@ -15,8 +15,9 @@ Option Explicit
 'separate tags by comma, e.g.: "@debug,@production"
 Const tags = "@debug"
 
-Dim mpreTestPresentation As Presentation
-
+Dim mTestPresentation As Presentation
+Dim mConfigSlide As Slide
+Dim mRuleConfig As Collection
 
 Public Sub test_scenarios()
 
@@ -25,7 +26,7 @@ Public Sub test_scenarios()
     On Error GoTo error_handler
     scenario = Array("Scenario: config with one parameter", _
                        "Given a config slide for the Feature_FontWhiteList", _
-                       "And the slide contains a configuration table with the parameter AllowedFonts with the value Arial", _
+                       "And the config slide contains the parameter AllowedFonts with the value Arial", _
                        "When the configuration for the Feature_FontWhiteList is read", _
                        "Then the value for the parameter AllowedFonts is set to Arial" _
                     )
@@ -39,12 +40,25 @@ End Sub
 Public Function run_step(pcolStepProps As Collection) As String
     
     Dim step_result As String
+    Dim config_table As Table
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
+    
         Case "Given a config slide for the Feature_FontWhiteList"
-           Debug.Print "PENDING test step"
-           'Set mpreTestPresentation = Application.Presentations.Add
+           Set mTestPresentation = Application.Presentations.Add
+           Set mConfigSlide = create_config_slide("Feature_FontWhiteList")
+           
+        Case "Given the config slide contains the parameter AllowedFonts with the value Arial"
+            Set config_table = create_config_table(mConfigSlide)
+            add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
+            
+        Case "When the configuration for the Feature_FontWhiteList is read"
+            Set mRuleConfig = Validator.read_config("Feature_FontWhiteList", mTestPresentation)
+            
+        Case "Then the value for the parameter AllowedFonts is set to Arial"
+            TSpec.expect(mRuleConfig).contains Array("AllowedFonts", "Arial")
+        
         Case Else
             TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
     End Select
@@ -83,8 +97,45 @@ Public Property Get description() As String
 End Property
 
 Private Sub Class_Terminate()
-    mpreTestPresentation.Saved = msoTrue
-    mpreTestPresentation.Close
+    mTestPresentation.Saved = msoTrue
+    mTestPresentation.Close
 End Sub
 
+Public Function create_config_slide(pRuleName As String) As Slide
+    
+    Dim config_slide As Slide
+    
+    Set config_slide = mTestPresentation.Slides.AddSlide(1, mTestPresentation.SlideMaster.CustomLayouts(6))
+    config_slide.Shapes.Title.TextFrame.TextRange.Text = pRuleName
+    Set create_config_slide = config_slide
+End Function
 
+Public Function create_config_table(pConfigSlide As Slide) As Table
+    
+    Dim config_table As Table
+    
+    Set config_table = pConfigSlide.Shapes.AddTable(1, 3, cm2points(2.33), cm2points(4.7), cm2points(29.21), cm2points(1.42)).Table
+    config_table.Cell(1, 1).shape.TextFrame.TextRange.Text = "Parameter"
+    config_table.Cell(1, 2).shape.TextFrame.TextRange.Text = "Value"
+    config_table.Cell(1, 3).shape.TextFrame.TextRange.Text = "Description"
+    Set create_config_table = config_table
+End Function
+
+Public Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Variant)
+
+    Dim parameter_row As Row
+    
+    Set parameter_row = pConfigTable.Rows.Add
+    parameter_row.Cells(1).shape.TextFrame.TextRange.Text = pConfigParameter(0)
+    parameter_row.Cells(2).shape.TextFrame.TextRange.Text = pConfigParameter(1)
+    parameter_row.Cells(3).shape.TextFrame.TextRange.Text = pConfigParameter(2)
+End Sub
+
+Public Function cm2points(pValueCm As Double) As Long
+
+    #If Mac Then
+        cm2points = CLng(pValueCm * (72 / 2.54))
+    #Else
+        cm2points = CLng(pValueCm * (96 / 2.54))
+    #End If
+End Function

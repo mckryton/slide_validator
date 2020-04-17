@@ -97,3 +97,12 @@ Private Sub cleanup_violation_messages()
 error_handler:
     SystemLogger.log_error "Validator.cleanup_violation_messages"
 End Sub
+
+Public Function read_config(pRuleName As String, Optional pConfigPresentation) As Collection
+    
+    Dim rule_config As Collection
+
+    Set rule_config = New Collection
+
+    Set read_config = rule_config
+End Function

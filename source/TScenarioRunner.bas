@@ -19,7 +19,7 @@ Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
     mTestStopped = False
     intLineIndex = 0
     Set colLine = getScenarioLine(pvarScenario, intLineIndex)
-    'TODO: refactor add functioon for print scenario title
+    'TODO: refactor add function for print scenario title
     If Left(colLine.Item("line"), Len("Scenario:")) <> "Scenario:" Then
         strSyntaxErrMsg = "can't find scenario start"
         GoTo syntax_error
