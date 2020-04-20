@@ -5,66 +5,73 @@ Attribute VB_Name = "TScenarioRunner"
 
 Option Explicit
 
+Public Const ERR_ID_SCENARIO_SYNTAX_ERROR = vbError + 6010
+
 Dim mTestStopped As Boolean
 
-Public Sub run_scenario(pvarScenario As Variant, pobjCaller As Variant)
+Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As Variant)
 
     Dim intLineIndex As Integer
     Dim colLine As Collection
-    Dim strSyntaxErrMsg As String
     Dim strLastStepType As String
-    Dim step_result As String
 
     On Error GoTo error_handler
-    mTestStopped = False
+    TScenarioRunner.TestStopped = False
     intLineIndex = 0
-    Set colLine = getScenarioLine(pvarScenario, intLineIndex)
-    'TODO: refactor add function for print scenario title
-    If Left(colLine.Item("line"), Len("Scenario:")) <> "Scenario:" Then
-        strSyntaxErrMsg = "can't find scenario start"
-        GoTo syntax_error
-    Else
-        Debug.Print vbTab & colLine.Item("line")
-    End If
-    'TODO: refactor add function execute step
+    Set colLine = getScenarioLine(pScenarioLinesArray, intLineIndex)
+    print_scenario_title colLine.Item("line")
     intLineIndex = intLineIndex + 1
     Do
-        Set colLine = getScenarioLine(pvarScenario, intLineIndex)
+        Set colLine = getScenarioLine(pScenarioLinesArray, intLineIndex)
         If colLine.Item("line_head") <> "And" Then
             strLastStepType = colLine.Item("line_head")
         End If
         colLine.Remove "step_type"
         colLine.Add strLastStepType, "step_type"
-        Select Case colLine.Item("step_type")
-        Case "Given", "When", "Then"
-            step_result = pobjCaller.run_step(colLine)
-            If step_result = "OK" Then
-                Debug.Print vbTab & step_result, vbTab & colLine.Item("line")
-            Else
-                Debug.Print vbTab & "FAILED", vbTab & colLine.Item("line")
-                Debug.Print step_result
-                End
-            End If
-        Case Else
-            strSyntaxErrMsg = "unexpected step type " & colLine.Item("step_type")
-            GoTo syntax_error
-        End Select
+        run_step_line colLine, pTestDefinitionObject
         intLineIndex = intLineIndex + 1
-    Loop Until TScenarioRunner.TestStopped = True Or intLineIndex > UBound(pvarScenario)
-
+    Loop Until TScenarioRunner.TestStopped = True Or intLineIndex > UBound(pScenarioLinesArray)
+    If Not TScenarioRunner.TestStopped Then
+        pTestDefinitionObject.after_all_steps
+    End If
     Exit Sub
     
-'TODO: refactor add function for raising syntax error
-syntax_error:
-    SystemLogger.log_error "syntax error: " & strSyntaxErrMsg & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
 error_handler:
-    SystemLogger.log_error "TScenarioRunner.runScenario", Join(pvarScenario, vbTab & vbCr & vbLf)
+    If Err.Number = ERR_ID_SCENARIO_SYNTAX_ERROR Then
+        SystemLogger.log_error "syntax error: " & Err.description & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
+    Else
+        SystemLogger.log_error "TScenarioRunner.runScenario", Join(pScenarioLinesArray, vbTab & vbCr & vbLf)
+    End If
 End Sub
-'-------------------------------------------------------------
-' Description   : tell about missing test for a step definition
-' Parameter     : pstrStepDefinition  - a Gherkin step definition as string
-'                 pobjCaller          - reference to the calling test class
-'-------------------------------------------------------------
+
+Private Sub print_scenario_title(pScenarioTitle As String)
+    
+    If Left(pScenarioTitle, Len("Scenario:")) <> "Scenario:" Then
+        Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="can't find scenario start"
+    Else
+        Debug.Print vbTab & pScenarioTitle
+    End If
+End Sub
+
+Private Sub run_step_line(pStepLine As Collection, pobjTestDefinition As Variant)
+
+    Dim step_result As String
+
+    Select Case pStepLine.Item("step_type")
+    Case "Given", "When", "Then"
+        step_result = pobjTestDefinition.run_step(pStepLine)
+        If step_result = "OK" Then
+            Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
+        Else
+            Debug.Print vbTab & "FAILED", vbTab & pStepLine.Item("line")
+            Debug.Print step_result
+            End
+        End If
+    Case Else
+        Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="unexpected step type " & pStepLine.Item("step_type")
+    End Select
+End Sub
+
 Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
 
     On Error GoTo error_handler
@@ -76,13 +83,6 @@ error_handler:
     SystemLogger.log_error "TScenarioRunner.missingTest " & pstrStepDefinition
 End Sub
 
-
-'-------------------------------------------------------------
-' Description   : pick a line from a given scenario
-' Parameter     : pvarScenario  - Gherkin scenario as variant array of strings
-'                 pintLineIndex - line number
-' Returnvalue   : line properties as collection
-'-------------------------------------------------------------
 Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Integer) As Collection
 
     Dim colLineProps As Collection
@@ -121,3 +121,5 @@ End Property
 Public Sub stop_test()
     TScenarioRunner.TestStopped = True
 End Sub
+
+

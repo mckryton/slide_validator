@@ -97,6 +97,10 @@ Public Property Get description() As String
     description = "The presentation should only use fonts listed in a white list"
 End Property
 
+Public Sub after_all_steps()
+
+End Sub
+
 Private Sub Class_Terminate()
     mpreTestPresentation.Saved = msoTrue
     mpreTestPresentation.Close

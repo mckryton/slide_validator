@@ -165,3 +165,8 @@ Private Function read_config_from_table(pConfigTable As Table) As Collection
     Set read_config_from_table = config_parameters
 End Function
 
+
+Public Sub select_validation_target()
+
+    TUnit.pending "select a presentation for validation"
+End Sub
