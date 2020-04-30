@@ -4,26 +4,18 @@ Attribute VB_Name = "TUnit"
 '------------------------------------------------------------------------
 Option Explicit
 
-Public Sub run_all_tests()
+Public Sub run_all_tests(Optional pTags)
     
-    Dim all_testcases As Variant
-    Dim testcase As Variant
+    Dim case_runner As TCaseRunner
+    Dim unit_testcases As Variant
 
-    On Error GoTo error_handler
-    all_testcases = Array(New Unit_ReadConfig)
-    For Each testcase In all_testcases
-        Debug.Print "Test case: " & TypeName(testcase)
-        Debug.Print vbTab & testcase.description & vbLf
-        testcase.test_scenarios
-        Set testcase = Nothing
-    Next
+    'On Error GoTo error_handler
+    unit_testcases = Array(New Unit_ReadConfig, New Unit_ChooseTarget)
+    Set case_runner = New TCaseRunner
+    case_runner.run_testcases unit_testcases, pTags
     Exit Sub
 
 error_handler:
     SystemLogger.log_error "TUnit.run_all_tests"
 End Sub
 
-Public Sub pending(pPendingMsg)
-    
-    Debug.Print "PENDING: " & pPendingMsg
-End Sub

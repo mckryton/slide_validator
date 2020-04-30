@@ -168,5 +168,5 @@ End Function
 
 Public Sub select_validation_target()
 
-    TUnit.pending "select a presentation for validation"
+    TScenarioRunner.pending "select a presentation for validation"
 End Sub

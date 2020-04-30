@@ -56,7 +56,7 @@ Public Sub contains(pvarExpectedItem As Variant)
             raise_expectation_err matcher_fail_msg
         End If
     Case "Array"
-        TUnit.pending "contains matcher for array"
+        TScenarioRunner.pending "contains matcher for array"
     End Select
 End Sub
 

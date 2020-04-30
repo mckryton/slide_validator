@@ -100,8 +100,10 @@ Public Sub after_all_steps()
 End Sub
 
 Private Sub Class_Terminate()
-    mTestPresentation.Saved = msoTrue
-    mTestPresentation.Close
+    If TypeName(mTestPresentation) <> "Nothing" Then
+        mTestPresentation.Saved = msoTrue
+        mTestPresentation.Close
+    End If
 End Sub
 
 Public Function create_config_slide(pRuleName As String) As Slide

@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const tags = ""
+Const cTags = "wip"
 
 Dim mOpenTestPresentations As Collection
 
@@ -55,7 +55,7 @@ Public Function run_step(pcolStepProps As Collection) As String
             Validator.select_validation_target
         
         Case "Then a list will show the names of the two presentations as possible validation targets"
-            TUnit.pending "verify showing a form with open presentations"
+            TScenarioRunner.pending "verify showing a form with open presentations"
         
         Case Else
             TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
@@ -85,3 +85,9 @@ End Property
 Public Sub after_all_steps()
 
 End Sub
+
+Public Property Get tags() As Variant
+    tags = cTags
+End Property
+
+

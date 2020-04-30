@@ -4,23 +4,18 @@ Attribute VB_Name = "TAcceptance"
 '------------------------------------------------------------------------
 Option Explicit
 
-Public Sub run_all_tests()
 
-    Dim all_features As Variant
-    Dim feature As Variant
+Public Sub run_all_tests(Optional pTags)
+    
+    Dim case_runner As TCaseRunner
+    Dim acceptance_testcases As Variant
 
     On Error GoTo error_handler
-    all_features = Array(New Feature_FontWhiteList)
-    For Each feature In all_features
-        Debug.Print "Feature: " & TypeName(feature)
-        Debug.Print vbTab & feature.description & vbLf
-        feature.test_scenarios
-        Set feature = Nothing
-    Next
+    acceptance_testcases = Array(New Feature_FontWhiteList)
+    Set case_runner = New TCaseRunner
+    case_runner.run_testcases acceptance_testcases, pTags
     Exit Sub
 
 error_handler:
     SystemLogger.log_error "TAcceptance.run_all_tests"
 End Sub
-
-

@@ -122,4 +122,8 @@ Public Sub stop_test()
     TScenarioRunner.TestStopped = True
 End Sub
 
+Public Sub pending(pPendingMsg)
+    
+    Debug.Print "PENDING: " & pPendingMsg
+End Sub
 
