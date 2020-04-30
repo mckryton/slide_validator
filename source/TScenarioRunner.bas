@@ -62,6 +62,9 @@ Private Sub run_step_line(pStepLine As Collection, pobjTestDefinition As Variant
         step_result = pobjTestDefinition.run_step(pStepLine)
         If step_result = "OK" Then
             Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
+        ElseIf step_result = "PENDING" Then
+            Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
+            End
         Else
             Debug.Print vbTab & "FAILED", vbTab & pStepLine.Item("line")
             Debug.Print step_result

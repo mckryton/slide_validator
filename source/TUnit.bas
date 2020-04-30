@@ -19,3 +19,7 @@ error_handler:
     SystemLogger.log_error "TUnit.run_all_tests"
 End Sub
 
+
+Public Sub run_wip_tests()
+    TUnit.run_all_tests "wip"
+End Sub
