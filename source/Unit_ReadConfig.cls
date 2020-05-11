@@ -13,9 +13,9 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const tags = ""
+Const cTags = ""
 
-Dim mTestPresentation As Presentation
+Dim mTestPresentation As presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
 
@@ -76,7 +76,7 @@ error_handler:
     End If
 End Function
 
-Private Sub add_slide_with_config(pprePresentation As Presentation, pvarConfig As Variant)
+Private Sub add_slide_with_config(pprePresentation As presentation, pvarConfig As Variant)
 
     Dim slide_with_config As Slide
     
@@ -147,3 +147,7 @@ Public Function cm2points(pValueCm As Double) As Long
         cm2points = CLng(pValueCm * (96 / 2.54))
     #End If
 End Function
+
+Public Property Get tags() As Variant
+    tags = cTags
+End Property

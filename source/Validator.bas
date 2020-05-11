@@ -101,7 +101,7 @@ End Sub
 Public Function read_config(pRuleName As String, Optional pConfigPresentation) As Collection
     
     Dim rule_config As Collection
-    Dim config_presentation As Presentation
+    Dim config_presentation As presentation
     Dim config_slide As Slide
     Dim config_table As Table
     
@@ -121,7 +121,7 @@ Public Function read_config(pRuleName As String, Optional pConfigPresentation) A
     Set read_config = rule_config
 End Function
 
-Private Function get_config_slide(pstrRuleName As String, pConfigPresentation As Presentation) As Slide
+Private Function get_config_slide(pstrRuleName As String, pConfigPresentation As presentation) As Slide
 
     Dim config_slide As Slide
     Dim slide_title As String
@@ -166,7 +166,25 @@ Private Function read_config_from_table(pConfigTable As Table) As Collection
 End Function
 
 
-Public Sub select_validation_target()
+Public Function get_validation_target_form() As SelectValidationTarget
 
-    TScenarioRunner.pending "select a presentation for validation"
-End Sub
+    Dim select_target_form As SelectValidationTarget
+    
+    Set select_target_form = New SelectValidationTarget
+    select_target_form.PresentationsInfo = get_target_presentations_info_info()
+    Set get_validation_target_form = select_target_form
+End Function
+
+Public Function get_target_presentations_info_info() As Collection
+    
+    Dim target_presentation_names As Collection
+    Dim open_presentation As presentation
+    
+    Set target_presentation_names = New Collection
+    For Each open_presentation In Application.Presentations
+        If open_presentation.Name <> "SlideValidator.pptm" Then
+            target_presentation_names.Add Array(open_presentation.Name, open_presentation.Path), open_presentation.Name
+        End If
+    Next
+    Set get_target_presentations_info_info = target_presentation_names
+End Function

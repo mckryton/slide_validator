@@ -16,6 +16,7 @@ Option Explicit
 Const cTags = "wip"
 
 Dim mOpenTestPresentations As Collection
+Dim mTargetSelectionForm As SelectValidationTarget
 
 Public Sub test_scenarios()
 
@@ -24,8 +25,8 @@ Public Sub test_scenarios()
     On Error GoTo error_handler
     scenario = Array("Scenario: more than one possible target presentation", _
                        "Given two presentations opened in addition to Slide Validator", _
-                       "When Slide Validator selects a presentation for validation", _
-                       "Then a list will show the names of the two presentations as possible validation targets" _
+                       "When the validator is looking for available validation targets", _
+                       "Then a form will list the two presentations as possible validation targets" _
                     )
     TScenarioRunner.run_scenario scenario, Me
     Exit Sub
@@ -38,27 +39,29 @@ Public Function run_step(pcolStepProps As Collection) As String
     
     Dim step_result As String
     Dim config_table As Table
-    Dim test_presentation As Presentation
+    Dim test_presentation As presentation
     Dim index As Integer
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
-        Case "Given two presentations Pres_1 and Pres_2 opened in addition to Slide Validator"
+        Case "Given two presentations opened in addition to Slide Validator"
             Set mOpenTestPresentations = New Collection
             For index = 1 To 2
                 Set test_presentation = Presentations.Add(msoTrue)
                 mOpenTestPresentations.Add test_presentation, test_presentation.Name
             Next
         
-        Case "When Slide Validator selects the first presentation for validation"
-            Validator.select_validation_target
+        Case "When the validator is looking for available validation targets"
+            Set mTargetSelectionForm = Validator.get_validation_target_form
         
-        Case "Then a list will show the names of the two presentations as possible validation targets"
-            TScenarioRunner.pending "verify showing a form with open presentations"
+        Case "Then a form will list the two presentations as possible validation targets"
+            TSpec.expect(UBound(mTargetSelectionForm.lstPresentations.List)).to_be 1
         
         Case Else
             TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            run_step = "MISSING"
+            Exit Function
     End Select
     run_step = "OK"
     Exit Function
@@ -84,10 +87,15 @@ End Property
 
 Public Sub after_all_steps()
 
+    Dim test_presentation As Variant
+    
+    For Each test_presentation In mOpenTestPresentations
+        test_presentation.Saved = msoTrue
+        test_presentation.Close
+    Next
+    Set mOpenTestPresentations = Nothing
 End Sub
 
 Public Property Get tags() As Variant
     tags = cTags
 End Property
-
-

@@ -32,11 +32,10 @@ Public Property Get given_value() As Variant
 End Property
 
 Public Property Let given_value(ByVal pvarGivenValue As Variant)
-    If TypeName(mvarGivenValue) = "Collection" Or TypeName(mvarGivenValue) = "Empty" Then
-        Set mvarGivenValue = pvarGivenValue
-    Else
-        mvarGivenValue = pvarGivenValue
-    End If
+    On Error Resume Next
+    Set mvarGivenValue = pvarGivenValue
+    mvarGivenValue = pvarGivenValue
+    On Error GoTo 0
 End Property
 
 Public Sub contains(pvarExpectedItem As Variant)

@@ -16,7 +16,7 @@ Option Explicit
 Const tags = "@debug"
 
 Dim mobjRuleFontWhiteList As Rule_FontWhiteList
-Dim mpreTestPresentation As Presentation
+Dim mpreTestPresentation As presentation
 
 
 Public Sub test_scenarios()
@@ -76,7 +76,7 @@ error_handler:
     End If
 End Function
 
-Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
+Private Sub add_slide_with_textbox(pprePresentation As presentation, pstrFontName As String)
 
     Dim slide_with_textbox As Slide
     Dim textbox As shape
@@ -98,10 +98,6 @@ Public Property Get description() As String
 End Property
 
 Public Sub after_all_steps()
-
-End Sub
-
-Private Sub Class_Terminate()
     mpreTestPresentation.Saved = msoTrue
     mpreTestPresentation.Close
 End Sub
