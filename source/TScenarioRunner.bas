@@ -32,8 +32,10 @@ Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As
         intLineIndex = intLineIndex + 1
     Loop Until TScenarioRunner.TestStopped = True Or intLineIndex > UBound(pScenarioLinesArray)
     If Not TScenarioRunner.TestStopped Then
-        pTestDefinitionObject.after_all_steps
+        pTestDefinitionObject.after
     End If
+    
+    Debug.Print
     Exit Sub
     
 error_handler:
@@ -62,7 +64,7 @@ Private Sub run_step_line(pStepLine As Collection, pobjTestDefinition As Variant
         step_result = pobjTestDefinition.run_step(pStepLine)
         If step_result = "OK" Then
             Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
-        ElseIf step_result = "PENDING" Then
+        ElseIf step_result = "PENDING" Or step_result = "MISSING" Then
             Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
             End
         Else
@@ -79,7 +81,7 @@ Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
 
     On Error GoTo error_handler
     TScenarioRunner.TestStopped = True
-    Debug.Print vbCr & vbLf & "missing test step for >" & pstrStepDefinition & "<" & vbCr & vbLf & "  rule validator: " & TypeName(pobjCaller)
+    'Debug.Print vbCr & vbLf & "missing test step for >" & pstrStepDefinition & "<" & vbCr & vbLf & "  rule validator: " & TypeName(pobjCaller)
     Exit Sub
 
 error_handler:

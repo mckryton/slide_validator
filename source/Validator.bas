@@ -7,13 +7,17 @@ Option Explicit
 Const mcRuleCheckAuthor = "Slide Validator"
 Const mcRuleCheckInitials = "bot"
 
-Public Sub run_slide_validator(Optional ppresPresentation, Optional pvarRules)
+Public Sub run_slide_validator(Optional pTargetPresentation, Optional pvarRules)
 
     Dim sldCurrent As Slide
 
     On Error GoTo error_handler
-    If IsMissing(ppresPresentation) Then
-        Set ppresPresentation = ActivePresentation
+    If IsMissing(pTargetPresentation) Then
+        Set pTargetPresentation = Validator.ValidationTarget
+        If TypeName(pTargetPresentation) = "Nothing" Then
+            MsgBox "Couldn't find any open presentation to apply validation rules.", vbExclamation + vbOKOnly, "No presentation for validation available"
+            End
+        End If
     End If
     If IsMissing(pvarRules) Then
         'TODO: add function to setup all rules
@@ -21,7 +25,7 @@ Public Sub run_slide_validator(Optional ppresPresentation, Optional pvarRules)
     End If
     'comments from earlier validations may not reflect the current content
     Validator.cleanup_violation_messages
-    For Each sldCurrent In ppresPresentation.Slides
+    For Each sldCurrent In pTargetPresentation.Slides
         'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
             SystemLogger.log "apply rules to slide " & sldCurrent.SlideIndex
@@ -59,7 +63,7 @@ Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As St
     Dim lngCommentPosX As Long
     
     On Error GoTo error_handler
-    'improve visibilty by putting all comments for violation messages in a row
+    'improve visibility by putting all comments for violation messages in a row
     lngCommentPosX = 10 * (psldValidatedSlide.Comments.Count + 1)
     psldValidatedSlide.Comments.Add lngCommentPosX, 10, mcRuleCheckAuthor, mcRuleCheckInitials, pstrViolationMessage
     Exit Sub
@@ -188,3 +192,18 @@ Public Function get_target_presentations_info_info() As Collection
     Next
     Set get_target_presentations_info_info = target_presentation_names
 End Function
+
+Public Property Get ValidationTarget() As presentation
+    
+    Dim selection_form As SelectValidationTarget
+    
+    Set selection_form = Validator.get_validation_target_form
+    If UBound(selection_form.lstPresentations.List) = -1 Then
+        Set ValidationTarget = Nothing
+    ElseIf UBound(selection_form.lstPresentations.List) = 0 Then
+        Set ValidationTarget = Application.Presentations(selection_form.lstPresentations.List(0))
+    Else
+        Set ValidationTarget = Application.Presentations(selection_form.lstPresentations.Value)
+    End If
+End Property
+

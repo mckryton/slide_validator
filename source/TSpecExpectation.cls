@@ -15,20 +15,33 @@ Public Sub to_be(pvarExpectedValue)
 
     Dim matcher_fail_msg As String
     
-    If Me.given_value <> pvarExpectedValue Then
-        matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
-                            vbTab & "found:" & vbTab & vbTab & ">" & Me.given_value & "<" & vbLf & _
-                            vbTab & "expected:" & vbTab & ">" & pvarExpectedValue & "<"
-        raise_expectation_err matcher_fail_msg
+    On Error GoTo error_handler
+    If IsObject(Me.given_value) Then
+        If Not (Me.given_value Is pvarExpectedValue) Then
+            matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
+                                vbTab & "can't match objects"
+            raise_expectation_err matcher_fail_msg
+        End If
+    Else
+        If Me.given_value <> pvarExpectedValue Then
+            matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
+                                vbTab & "found:" & vbTab & vbTab & ">" & Me.given_value & "<" & vbLf & _
+                                vbTab & "expected:" & vbTab & ">" & pvarExpectedValue & "<"
+            raise_expectation_err matcher_fail_msg
+        End If
     End If
+    Exit Sub
+    
+error_handler:
+    matcher_fail_msg = vbTab & "can't compare given with expected value - check if only one of them is an object"
+    raise_expectation_err matcher_fail_msg
 End Sub
 
 Public Property Get given_value() As Variant
-    If TypeName(mvarGivenValue) = "Collection" Or TypeName(mvarGivenValue) = "Empty" Then
-        Set given_value = mvarGivenValue
-    Else
-        given_value = mvarGivenValue
-    End If
+    On Error Resume Next
+    Set given_value = mvarGivenValue
+    given_value = mvarGivenValue
+    On Error GoTo 0
 End Property
 
 Public Property Let given_value(ByVal pvarGivenValue As Variant)

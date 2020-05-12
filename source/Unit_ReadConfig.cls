@@ -95,7 +95,7 @@ Public Property Get description() As String
                     vbTab & "Configuration slides will use the name of the feature class as headline." & vbLf & _
                     vbTab & "A table with 3 columns for parameter name, value and description will held the config."
 End Property
-Public Sub after_all_steps()
+Public Sub after()
     If TypeName(mTestPresentation) <> "Nothing" Then
         mTestPresentation.Saved = msoTrue
         mTestPresentation.Close
