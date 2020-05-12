@@ -96,10 +96,6 @@ Public Property Get description() As String
                     vbTab & "A table with 3 columns for parameter name, value and description will held the config."
 End Property
 Public Sub after_all_steps()
-
-End Sub
-
-Private Sub Class_Terminate()
     If TypeName(mTestPresentation) <> "Nothing" Then
         mTestPresentation.Saved = msoTrue
         mTestPresentation.Close
