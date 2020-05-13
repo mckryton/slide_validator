@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = "wip"
+Const cTags = ""
 
 Dim mTestPresentation As presentation
 Dim mConfigSlide As Slide
@@ -81,6 +81,20 @@ error_handler:
     End If
 End Function
 
+Public Property Get description() As String
+
+    description = "Slide Validator will read all config parameters from it's own slides" & vbLf & _
+                    vbTab & "Configuration slides will use the name of the feature class as headline." & vbLf & _
+                    vbTab & "A table with 3 columns for parameter name, value and description will held the config."
+End Property
+
+Public Sub after()
+    If TypeName(mTestPresentation) <> "Nothing" Then
+        mTestPresentation.Saved = msoTrue
+        mTestPresentation.Close
+    End If
+End Sub
+
 Private Sub add_slide_with_config(pprePresentation As presentation, pvarConfig As Variant)
 
     Dim slide_with_config As Slide
@@ -94,20 +108,7 @@ error_handler:
     SystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
 End Sub
 
-Public Property Get description() As String
-
-    description = "Slide Validator will read all config parameters from it's own slides" & vbLf & _
-                    vbTab & "Configuration slides will use the name of the feature class as headline." & vbLf & _
-                    vbTab & "A table with 3 columns for parameter name, value and description will held the config."
-End Property
-Public Sub after()
-    If TypeName(mTestPresentation) <> "Nothing" Then
-        mTestPresentation.Saved = msoTrue
-        mTestPresentation.Close
-    End If
-End Sub
-
-Public Function create_config_slide(pRuleName As String) As Slide
+Private Function create_config_slide(pRuleName As String) As Slide
     
     Dim config_slide As Slide
     
@@ -117,18 +118,18 @@ Public Function create_config_slide(pRuleName As String) As Slide
     Set create_config_slide = config_slide
 End Function
 
-Public Function create_config_table(pConfigSlide As Slide) As Table
+Private Function create_config_table(pConfigSlide As Slide) As Table
     
     Dim config_table As Table
     
-    Set config_table = pConfigSlide.Shapes.AddTable(1, 3, cm2points(2.33), cm2points(4.7), cm2points(29.21), cm2points(1.42)).Table
+    Set config_table = pConfigSlide.Shapes.AddTable(1, 3, System.cm2points(2.33), System.cm2points(4.7), System.cm2points(29.21), System.cm2points(1.42)).Table
     config_table.Cell(1, 1).shape.TextFrame.TextRange.Text = "Parameter"
     config_table.Cell(1, 2).shape.TextFrame.TextRange.Text = "Value"
     config_table.Cell(1, 3).shape.TextFrame.TextRange.Text = "Description"
     Set create_config_table = config_table
 End Function
 
-Public Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Variant)
+Private Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Variant)
 
     Dim parameter_row As Row
     
@@ -138,15 +139,6 @@ Public Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Varia
     parameter_row.Cells(3).shape.TextFrame.TextRange.Text = pConfigParameter(2)
 End Sub
 
-Public Function cm2points(pValueCm As Double) As Long
-
-    #If Mac Then
-        cm2points = CLng(pValueCm * (72 / 2.54))
-    #Else
-        cm2points = CLng(pValueCm * (96 / 2.54))
-    #End If
-End Function
-
-Public Property Get tags() As Variant
-    tags = cTags
+Public Property Get Tags() As Variant
+    Tags = cTags
 End Property
