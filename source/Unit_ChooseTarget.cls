@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = "wip"
+Const cTags = ""
 
 Dim mOpenTestPresentations As Collection
 Dim mTargetSelectionForm As SelectValidationTarget
@@ -47,7 +47,7 @@ Public Sub test_scenarios()
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Unit_ChooseTarget.runTest"
+    SystemLogger.log_error "Unit_ChooseTarget.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As String

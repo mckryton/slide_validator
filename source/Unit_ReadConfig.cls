@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = ""
+Const cTags = "wip"
 
 Dim mTestPresentation As presentation
 Dim mConfigSlide As Slide
@@ -21,20 +21,25 @@ Dim mRuleConfig As Collection
 
 Public Sub test_scenarios()
 
+    Dim scenarios As Variant
     Dim scenario As Variant
 
     On Error GoTo error_handler
-    scenario = Array("Scenario: config with one parameter", _
-                       "Given a config slide for the Feature_FontWhiteList", _
-                       "And the config slide contains the parameter AllowedFonts with the value Arial", _
-                       "When the configuration for the Feature_FontWhiteList is read", _
-                       "Then the value for the parameter AllowedFonts is set to Arial" _
-                    )
-    TScenarioRunner.run_scenario scenario, Me
+    scenarios = Array( _
+                    Array("Scenario: config with one parameter", _
+                           "Given a config slide for the Feature_FontWhiteList", _
+                           "And the config slide contains the parameter AllowedFonts with the value Arial", _
+                           "When the configuration for the Feature_FontWhiteList is read", _
+                           "Then the value for the parameter AllowedFonts is set to Arial" _
+                    ) _
+                )
+    For Each scenario In scenarios
+        TScenarioRunner.run_scenario scenario, Me
+    Next
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Unit_ReadConfig.runTest"
+    SystemLogger.log_error "Unit_ReadConfig.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As String
@@ -107,8 +112,6 @@ Public Function create_config_slide(pRuleName As String) As Slide
     Dim config_slide As Slide
     
     Set config_slide = mTestPresentation.Slides.AddSlide(1, mTestPresentation.SlideMaster.CustomLayouts(6))
-    'todo: remove next line
-    mTestPresentation.Slides.AddSlide 1, mTestPresentation.SlideMaster.CustomLayouts(7)
     config_slide.Shapes.Title.TextFrame.TextRange.Text = pRuleName
     config_slide.Name = pRuleName
     Set create_config_slide = config_slide

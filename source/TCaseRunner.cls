@@ -22,7 +22,7 @@ Public Sub run_testcases(pTestCases As Variant, Optional pTags)
             run_test = test_has_tag(pTags, testcase)
         End If
         If run_test Then
-            Debug.Print vbLf & vbLf
+            Debug.Print ""
             Debug.Print "Test case: " & TypeName(testcase)
             Debug.Print vbTab & testcase.description & vbLf
             testcase.test_scenarios
