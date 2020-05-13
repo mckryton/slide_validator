@@ -2,19 +2,9 @@ Attribute VB_Name = "System"
 '------------------------------------------------------------------------
 ' Description  : extends system related functions
 '------------------------------------------------------------------------
-'
-'Declarations
 
-'Declare variables
-
-'Options
 Option Explicit
-'-------------------------------------------------------------
-' Description   : checks if item exists in a collection object
-' Parameter     : pvarKey           - item name
-'                 pcolACollection   - collection object
-' Returnvalue   : true if item exits, false if not
-'-------------------------------------------------------------
+
 Public Function existsItem(pvarKey As Variant, pcolACollection As Collection) As Boolean
                     
     Dim varItemValue As Variant
@@ -29,17 +19,16 @@ NOT_FOUND:
     existsItem = False
 End Function
 
-'-------------------------------------------------------------
-' Description   : save source code as text files
-'-------------------------------------------------------------
 Private Sub exportCode()
 
     Dim vcomSource As VBComponent
     Dim strPath As String
     Dim strSeparator As String
     Dim strSuffix As String
+    Dim export_logger As Logger
 
     On Error GoTo error_handler
+    Set export_logger = New Logger
     #If MAC_OFFICE_VERSION >= 15 Then
         'in Office 2016 MAC M$ switched to / as path separator
         strSeparator = "/"
@@ -63,10 +52,10 @@ Private Sub exportCode()
                 strSuffix = "txt"
         End Select
         vcomSource.Export strPath & strSeparator & vcomSource.Name & "." & strSuffix
-        SystemLogger.log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
+        export_logger.log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
     Next
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "System.exportCode"
+    export_logger.log_function_error "System.exportCode"
 End Sub
