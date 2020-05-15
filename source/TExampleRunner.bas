@@ -1,4 +1,4 @@
-Attribute VB_Name = "TScenarioRunner"
+Attribute VB_Name = "TExampleRunner"
 '------------------------------------------------------------------------
 ' Description  : execute test steps for Gherkin scenarios / examples
 '------------------------------------------------------------------------
@@ -16,9 +16,13 @@ Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As
     Dim strLastStepType As String
 
     On Error GoTo error_handler
-    TScenarioRunner.TestStopped = False
+    TExampleRunner.TestStopped = False
     intLineIndex = 0
     Set colLine = getScenarioLine(pScenarioLinesArray, intLineIndex)
+    If LCase(colLine("line_head")) = "rule:" Then
+        print_rule colLine.Item("line")
+        Exit Sub
+    End If
     print_scenario_title colLine.Item("line")
     intLineIndex = intLineIndex + 1
     Do
@@ -30,8 +34,8 @@ Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As
         colLine.Add strLastStepType, "step_type"
         run_step_line colLine, pTestDefinitionObject
         intLineIndex = intLineIndex + 1
-    Loop Until TScenarioRunner.TestStopped = True Or intLineIndex > UBound(pScenarioLinesArray)
-    If Not TScenarioRunner.TestStopped Then
+    Loop Until TExampleRunner.TestStopped = True Or intLineIndex > UBound(pScenarioLinesArray)
+    If Not TExampleRunner.TestStopped Then
         pTestDefinitionObject.after
     End If
     
@@ -42,13 +46,19 @@ error_handler:
     If Err.Number = ERR_ID_SCENARIO_SYNTAX_ERROR Then
         SystemLogger.log_error "syntax error: " & Err.description & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
     Else
-        SystemLogger.log_error "TScenarioRunner.runScenario", Join(pScenarioLinesArray, vbTab & vbCr & vbLf)
+        SystemLogger.log_error "TExampleRunner.runScenario", Join(pScenarioLinesArray, vbTab & vbCr & vbLf)
     End If
+End Sub
+
+Private Sub print_rule(pRule As String)
+    
+    Debug.Print vbTab & pRule
+    Debug.Print ""
 End Sub
 
 Private Sub print_scenario_title(pScenarioTitle As String)
     
-    If Left(pScenarioTitle, Len("Scenario:")) <> "Scenario:" Then
+    If LCase(Left(pScenarioTitle, Len("Scenario:"))) <> "scenario:" Then
         Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="can't find scenario start"
     Else
         Debug.Print vbTab & pScenarioTitle
@@ -80,12 +90,12 @@ End Sub
 Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
 
     On Error GoTo error_handler
-    TScenarioRunner.TestStopped = True
+    TExampleRunner.TestStopped = True
     'Debug.Print vbCr & vbLf & "missing test step for >" & pstrStepDefinition & "<" & vbCr & vbLf & "  rule validator: " & TypeName(pobjCaller)
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "TScenarioRunner.missingTest " & pstrStepDefinition
+    SystemLogger.log_error "TExampleRunner.missingTest " & pstrStepDefinition
 End Sub
 
 Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Integer) As Collection
@@ -112,7 +122,7 @@ Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Intege
     Exit Function
 
 error_handler:
-    SystemLogger.log_error "TScenarioRunner.getScenarioLine"
+    SystemLogger.log_error "TExampleRunner.getScenarioLine"
 End Function
 
 Public Property Get TestStopped() As Boolean
@@ -124,7 +134,7 @@ Private Property Let TestStopped(ByVal pTestStopped As Boolean)
 End Property
 
 Public Sub stop_test()
-    TScenarioRunner.TestStopped = True
+    TExampleRunner.TestStopped = True
 End Sub
 
 Public Sub pending(pPendingMsg)

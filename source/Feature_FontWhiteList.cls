@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const tags = "@debug"
+Const cTags = "@debug"
 
 Dim mobjRuleFontWhiteList As Rule_FontWhiteList
 Dim mpreTestPresentation As presentation
@@ -76,6 +76,20 @@ error_handler:
     End If
 End Function
 
+Public Property Get description() As String
+
+    description = "The presentation should only use fonts listed in a white list"
+End Property
+
+Public Sub after()
+    mpreTestPresentation.Saved = msoTrue
+    mpreTestPresentation.Close
+End Sub
+
+Public Property Get Tags() As Variant
+    Tags = cTags
+End Property
+
 Private Sub add_slide_with_textbox(pprePresentation As presentation, pstrFontName As String)
 
     Dim slide_with_textbox As Slide
@@ -90,14 +104,4 @@ Private Sub add_slide_with_textbox(pprePresentation As presentation, pstrFontNam
     
 error_handler:
     SystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
-End Sub
-
-Public Property Get description() As String
-
-    description = "The presentation should only use fonts listed in a white list"
-End Property
-
-Public Sub after()
-    mpreTestPresentation.Saved = msoTrue
-    mpreTestPresentation.Close
 End Sub
