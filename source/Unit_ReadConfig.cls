@@ -15,7 +15,7 @@ Option Explicit
 'separate tags by comma, e.g.: "@debug,@production"
 Const cTags = ""
 
-Dim mTestPresentation As presentation
+Dim mTestPresentation As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
 
@@ -34,7 +34,7 @@ Public Sub test_scenarios()
                     ) _
                 )
     For Each scenario In scenarios
-        TScenarioRunner.run_scenario scenario, Me
+        TExampleRunner.run_scenario scenario, Me
     Next
     Exit Sub
 
@@ -65,14 +65,14 @@ Public Function run_step(pcolStepProps As Collection) As String
             TSpec.expect(mRuleConfig).contains Array("AllowedFonts", "Arial")
         
         Case Else
-            TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            TExampleRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
     End Select
     run_step = "OK"
     Exit Function
 
 error_handler:
     If Err.Number = TSpec.ERR_ID_EXPECTATION_FAILED Then
-        TScenarioRunner.stop_test
+        TExampleRunner.stop_test
         run_step = Err.description
         Err.Clear
         Exit Function
@@ -95,7 +95,7 @@ Public Sub after()
     End If
 End Sub
 
-Private Sub add_slide_with_config(pprePresentation As presentation, pvarConfig As Variant)
+Private Sub add_slide_with_config(pprePresentation As Presentation, pvarConfig As Variant)
 
     Dim slide_with_config As Slide
     
@@ -122,7 +122,7 @@ Private Function create_config_table(pConfigSlide As Slide) As Table
     
     Dim config_table As Table
     
-    Set config_table = pConfigSlide.Shapes.AddTable(1, 3, System.cm2points(2.33), System.cm2points(4.7), System.cm2points(29.21), System.cm2points(1.42)).Table
+    Set config_table = pConfigSlide.Shapes.AddTable(1, 3, ExtraPpt.cm2points(2.33), ExtraPpt.cm2points(4.7), ExtraPpt.cm2points(29.21), ExtraPpt.cm2points(1.42)).Table
     config_table.Cell(1, 1).shape.TextFrame.TextRange.Text = "Parameter"
     config_table.Cell(1, 2).shape.TextFrame.TextRange.Text = "Value"
     config_table.Cell(1, 3).shape.TextFrame.TextRange.Text = "Description"

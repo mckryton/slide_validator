@@ -57,7 +57,7 @@ Public Sub contains(pvarExpectedItem As Variant)
     
     Select Case TypeName(Me.given_value)
     Case "Collection"
-        If Not System.existsItem(pvarExpectedItem(0), Me.given_value) Then
+        If Not ExtraVBA.existsItem(pvarExpectedItem(0), Me.given_value) Then
             matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
                         vbTab & "collection does not contain item " & ">" & pvarExpectedItem(0) & "<"
             raise_expectation_err matcher_fail_msg
@@ -68,7 +68,7 @@ Public Sub contains(pvarExpectedItem As Variant)
             raise_expectation_err matcher_fail_msg
         End If
     Case "Array"
-        TScenarioRunner.pending "contains matcher for array"
+        TExampleRunner.pending "contains matcher for array"
     End Select
 End Sub
 

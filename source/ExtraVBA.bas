@@ -1,8 +1,4 @@
-Attribute VB_Name = "System"
-'------------------------------------------------------------------------
-' Description  : extends system related functions
-'------------------------------------------------------------------------
-
+Attribute VB_Name = "ExtraVBA"
 Option Explicit
 
 Public Function existsItem(pvarKey As Variant, pcolACollection As Collection) As Boolean
@@ -59,13 +55,3 @@ Private Sub exportCode()
 error_handler:
     export_logger.log_function_error "System.exportCode"
 End Sub
-
-'this function helps to position shapes in Powerpoint
-Public Function cm2points(pValueCm As Double) As Long
-
-    #If Mac Then
-        cm2points = CLng(pValueCm * (72 / 2.54))
-    #Else
-        cm2points = CLng(pValueCm * (96 / 2.54))
-    #End If
-End Function

@@ -31,7 +31,7 @@ Public Function apply_rule(psldCurrentSlide As Slide) As String
     violations = ""
     For Each shape In psldCurrentSlide.Shapes
         If shape.TextFrame.HasText Then
-            If Not System.existsItem(shape.TextFrame2.TextRange.Font.Name, Me.font_white_list) Then
+            If Not ExtraVBA.existsItem(shape.TextFrame2.TextRange.Font.Name, Me.font_white_list) Then
                 violations = violations & "illegal font >" & shape.TextFrame2.TextRange.Font.Name & "< in shape " & shape.Name & vbCrLf
             End If
         End If
