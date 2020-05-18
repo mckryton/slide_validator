@@ -18,7 +18,7 @@ Const cTags = ""
 Dim mOpenTestPresentations As Collection
 Dim mTargetSelectionForm As SelectValidationTarget
 
-Public Sub test_scenarios()
+Public Sub test_examples()
 
     Dim scenarios As Variant
     Dim scenario As Variant
@@ -42,7 +42,7 @@ Public Sub test_scenarios()
                         ) _
                     )
     For Each scenario In scenarios
-        TScenarioRunner.run_scenario scenario, Me
+        TExampleRunner.run_example scenario, Me
     Next
     Exit Sub
 
@@ -54,7 +54,7 @@ Public Function run_step(pcolStepProps As Collection) As String
     
     Dim step_result As String
     Dim config_table As Table
-    Dim test_presentation As presentation
+    Dim test_presentation As Presentation
     Dim index As Integer
     
     On Error GoTo error_handler
@@ -83,7 +83,7 @@ Public Function run_step(pcolStepProps As Collection) As String
             TSpec.expect(TypeName(Validator.ValidationTarget)).to_be "Nothing"
             
         Case Else
-            TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            TExampleRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
             run_step = "MISSING"
             Exit Function
     End Select
@@ -91,14 +91,18 @@ Public Function run_step(pcolStepProps As Collection) As String
     Exit Function
 
 error_handler:
-    If Err.Number = TSpec.ERR_ID_EXPECTATION_FAILED Then
-        TScenarioRunner.stop_test
+    Select Case Err.Number
+    Case TSpec.ERR_ID_EXPECTATION_FAILED
+        TExampleRunner.stop_test
         run_step = Err.description
         Err.Clear
-        Exit Function
-    Else
+    Case ERR_ID_STEP_IS_PENDING
+        TExampleRunner.stop_test
+        run_step = "PENDING"
+        Err.Clear
+    Case Else
         SystemLogger.log_error "Unit_ChooseTarget.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
-    End If
+    End Select
 End Function
 
 Public Property Get description() As String
@@ -107,7 +111,6 @@ Public Property Get description() As String
                     & "validate this automatically. Otherwise a dialog will present as list with names " & vbLf _
                     & "of possible validation candidates."
 End Property
-
 
 Public Sub after()
 
@@ -122,6 +125,10 @@ Public Sub after()
     End If
 End Sub
 
-Public Property Get tags() As Variant
-    tags = cTags
+Public Property Get Tags() As Variant
+    Tags = cTags
 End Property
+
+Private Sub pending(pPendingMsg)
+    Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+End Sub

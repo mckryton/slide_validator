@@ -6,10 +6,11 @@ Attribute VB_Name = "TExampleRunner"
 Option Explicit
 
 Public Const ERR_ID_SCENARIO_SYNTAX_ERROR = vbError + 6010
+Public Const ERR_ID_STEP_IS_PENDING = vbError + 6020
 
 Dim mTestStopped As Boolean
 
-Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As Variant)
+Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As Variant)
 
     Dim intLineIndex As Integer
     Dim colLine As Collection
@@ -18,7 +19,7 @@ Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As
     On Error GoTo error_handler
     TExampleRunner.TestStopped = False
     intLineIndex = 0
-    Set colLine = getScenarioLine(pScenarioLinesArray, intLineIndex)
+    Set colLine = getExampleLine(pExampleLinesArray, intLineIndex)
     If LCase(colLine("line_head")) = "rule:" Then
         print_rule colLine.Item("line")
         Exit Sub
@@ -26,7 +27,7 @@ Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As
     print_scenario_title colLine.Item("line")
     intLineIndex = intLineIndex + 1
     Do
-        Set colLine = getScenarioLine(pScenarioLinesArray, intLineIndex)
+        Set colLine = getExampleLine(pExampleLinesArray, intLineIndex)
         If colLine.Item("line_head") <> "And" Then
             strLastStepType = colLine.Item("line_head")
         End If
@@ -34,7 +35,7 @@ Public Sub run_scenario(pScenarioLinesArray As Variant, pTestDefinitionObject As
         colLine.Add strLastStepType, "step_type"
         run_step_line colLine, pTestDefinitionObject
         intLineIndex = intLineIndex + 1
-    Loop Until TExampleRunner.TestStopped = True Or intLineIndex > UBound(pScenarioLinesArray)
+    Loop Until TExampleRunner.TestStopped = True Or intLineIndex > UBound(pExampleLinesArray)
     If Not TExampleRunner.TestStopped Then
         pTestDefinitionObject.after
     End If
@@ -46,7 +47,7 @@ error_handler:
     If Err.Number = ERR_ID_SCENARIO_SYNTAX_ERROR Then
         SystemLogger.log_error "syntax error: " & Err.description & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
     Else
-        SystemLogger.log_error "TExampleRunner.runScenario", Join(pScenarioLinesArray, vbTab & vbCr & vbLf)
+        SystemLogger.log_error "TExampleRunner.runExample", Join(pExampleLinesArray, vbTab & vbCr & vbLf)
     End If
 End Sub
 
@@ -56,12 +57,12 @@ Private Sub print_rule(pRule As String)
     Debug.Print ""
 End Sub
 
-Private Sub print_scenario_title(pScenarioTitle As String)
+Private Sub print_scenario_title(pExampleTitle As String)
     
-    If LCase(Left(pScenarioTitle, Len("Scenario:"))) <> "scenario:" Then
-        Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="can't find scenario start"
+    If LCase(Left(pExampleTitle, Len("Scenario:"))) <> "scenario:" And LCase(Left(pExampleTitle, Len("Example:"))) <> "example:" Then
+        Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="can't find scenario start in >" & pExampleTitle & "<"
     Else
-        Debug.Print vbTab & pScenarioTitle
+        Debug.Print vbTab & pExampleTitle
     End If
 End Sub
 
@@ -98,7 +99,7 @@ error_handler:
     SystemLogger.log_error "TExampleRunner.missingTest " & pstrStepDefinition
 End Sub
 
-Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Integer) As Collection
+Public Function getExampleLine(pvarExample As Variant, pintLineIndex As Integer) As Collection
 
     Dim colLineProps As Collection
     Dim strLine As String     'the whole line
@@ -107,7 +108,7 @@ Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Intege
     Dim varWords As Variant   'all words of the line as array
     
     On Error GoTo error_handler
-    strLine = Trim(pvarScenario(pintLineIndex))
+    strLine = Trim(pvarExample(pintLineIndex))
     varWords = Split(strLine, " ")
     strStepType = varWords(0)
     strStepDef = Right(strLine, Len(strLine) - Len(strStepType))
@@ -118,11 +119,11 @@ Public Function getScenarioLine(pvarScenario As Variant, pintLineIndex As Intege
         .Add strStepDef, "line_body"
         .Add vbNullString, "step_type"      'step type depends on context, e.g. previous steps
     End With
-    Set getScenarioLine = colLineProps
+    Set getExampleLine = colLineProps
     Exit Function
 
 error_handler:
-    SystemLogger.log_error "TExampleRunner.getScenarioLine"
+    SystemLogger.log_error "TExampleRunner.getExampleLine"
 End Function
 
 Public Property Get TestStopped() As Boolean
@@ -140,5 +141,6 @@ End Sub
 Public Sub pending(pPendingMsg)
     
     Debug.Print "PENDING: " & pPendingMsg
+    stop_test
 End Sub
 

@@ -16,10 +16,10 @@ Option Explicit
 Const cTags = "@debug"
 
 Dim mobjRuleFontWhiteList As Rule_FontWhiteList
-Dim mpreTestPresentation As presentation
+Dim mpreTestPresentation As Presentation
 
 
-Public Sub test_scenarios()
+Public Sub test_examples()
 
     Dim scenario As Variant
 
@@ -32,7 +32,7 @@ Public Sub test_scenarios()
                        "When the rule is applied to the presentation", _
                        "Then a comment about the rule validation is added to the second slide" _
                     )
-    TScenarioRunner.run_scenario scenario, Me
+    TExampleRunner.run_example scenario, Me
     Exit Sub
 
 error_handler:
@@ -55,25 +55,29 @@ Public Function run_step(pcolStepProps As Collection) As String
         Case "Given it contains a slide with a textbox using Times New Roman"
             add_slide_with_textbox mpreTestPresentation, "Times New Roman"
         Case "When the rule is applied to the presentation"
-            Validator.run_slide_validator mpreTestPresentation, Array(mobjRuleFontWhiteList)
+            Validator.validate_slides mpreTestPresentation, Array(mobjRuleFontWhiteList)
         Case "Then a comment about the rule validation is added to the second slide"
             TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 1
             TSpec.expect(mpreTestPresentation.Slides(2).Comments.Count).to_be 0
         Case Else
-            TScenarioRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            TExampleRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
     End Select
     run_step = "OK"
     Exit Function
 
 error_handler:
-    If Err.Number = TSpec.ERR_ID_EXPECTATION_FAILED Then
-        TScenarioRunner.stop_test
+    Select Case Err.Number
+    Case TSpec.ERR_ID_EXPECTATION_FAILED
+        TExampleRunner.stop_test
         run_step = Err.description
         Err.Clear
-        Exit Function
-    Else
+    Case ERR_ID_STEP_IS_PENDING
+        TExampleRunner.stop_test
+        run_step = "PENDING"
+        Err.Clear
+    Case Else
         SystemLogger.log_error "clsFeatureFontWhiteList.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
-    End If
+    End Select
 End Function
 
 Public Property Get description() As String
@@ -90,7 +94,11 @@ Public Property Get Tags() As Variant
     Tags = cTags
 End Property
 
-Private Sub add_slide_with_textbox(pprePresentation As presentation, pstrFontName As String)
+Private Sub pending(pPendingMsg)
+    Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+End Sub
+
+Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
 
     Dim slide_with_textbox As Slide
     Dim textbox As shape

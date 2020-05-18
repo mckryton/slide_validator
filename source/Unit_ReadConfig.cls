@@ -13,13 +13,15 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = ""
+Const cTags = "wip"
+
+Const RULE_CFG_SLIDE_IDX = 2
 
 Dim mTestPresentation As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
 
-Public Sub test_scenarios()
+Public Sub test_examples()
 
     Dim scenarios As Variant
     Dim scenario As Variant
@@ -34,7 +36,7 @@ Public Sub test_scenarios()
                     ) _
                 )
     For Each scenario In scenarios
-        TExampleRunner.run_scenario scenario, Me
+        TExampleRunner.run_example scenario, Me
     Next
     Exit Sub
 
@@ -51,15 +53,16 @@ Public Function run_step(pcolStepProps As Collection) As String
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
         Case "Given a config slide for the Feature_FontWhiteList"
-           Set mTestPresentation = Application.Presentations.Add
-           Set mConfigSlide = create_config_slide("Feature_FontWhiteList")
+           Set mTestPresentation = create_config_presentation
+           Set mConfigSlide = create_config_slide(mTestPresentation, "FontWhiteList")
            
         Case "Given the config slide contains the parameter AllowedFonts with the value Arial"
             Set config_table = create_config_table(mConfigSlide)
             add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
             
         Case "When the configuration for the Feature_FontWhiteList is read"
-            Set mRuleConfig = Validator.read_config("Feature_FontWhiteList", mTestPresentation)
+            pending "read config"
+            'Set mRuleConfig = Validator.read_config("Feature_FontWhiteList", mTestPresentation)
             
         Case "Then the value for the parameter AllowedFonts is set to Arial"
             TSpec.expect(mRuleConfig).contains Array("AllowedFonts", "Arial")
@@ -71,14 +74,18 @@ Public Function run_step(pcolStepProps As Collection) As String
     Exit Function
 
 error_handler:
-    If Err.Number = TSpec.ERR_ID_EXPECTATION_FAILED Then
+    Select Case Err.Number
+    Case TSpec.ERR_ID_EXPECTATION_FAILED
         TExampleRunner.stop_test
         run_step = Err.description
         Err.Clear
-        Exit Function
-    Else
+    Case ERR_ID_STEP_IS_PENDING
+        TExampleRunner.stop_test
+        run_step = "PENDING"
+        Err.Clear
+    Case Else
         SystemLogger.log_error "Unit_ReadConfig.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
-    End If
+    End Select
 End Function
 
 Public Property Get description() As String
@@ -95,24 +102,40 @@ Public Sub after()
     End If
 End Sub
 
-Private Sub add_slide_with_config(pprePresentation As Presentation, pvarConfig As Variant)
+Public Property Get Tags() As Variant
+    Tags = cTags
+End Property
 
-    Dim slide_with_config As Slide
-    
-    On Error GoTo error_handler
-    Set slide_with_config = pprePresentation.Slides.AddSlide(1, pprePresentation.SlideMaster.CustomLayouts(7))
-    Debug.Print "PENDING add config table to slide"
-    Exit Sub
-    
-error_handler:
-    SystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
+Private Sub pending(pPendingMsg)
+    Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
-Private Function create_config_slide(pRuleName As String) As Slide
+Private Function create_config_presentation() As Presentation
+
+    Dim config_presentation As Presentation
+    Dim slide_validator As Presentation
+    Dim master_slide As CustomLayout
+        
+    On Error GoTo error_handler
+    Set slide_validator = Application.Presentations("SlideValidator.pptm")
+    Set config_presentation = Application.Presentations.Add
+    
+    Set master_slide = slide_validator.SlideMaster.CustomLayouts(RULE_CFG_SLIDE_IDX)
+    master_slide.Copy
+    config_presentation.SlideMaster.CustomLayouts.Paste RULE_CFG_SLIDE_IDX
+    
+    Set create_config_presentation = config_presentation
+    Exit Function
+    
+error_handler:
+    SystemLogger.log_error "clsFeatureFontWhiteList.create_config_presentation"
+End Function
+
+Private Function create_config_slide(pConfigPresentation As Presentation, pRuleName As String) As Slide
     
     Dim config_slide As Slide
     
-    Set config_slide = mTestPresentation.Slides.AddSlide(1, mTestPresentation.SlideMaster.CustomLayouts(6))
+    Set config_slide = pConfigPresentation.Slides.AddSlide(1, pConfigPresentation.SlideMaster.CustomLayouts(RULE_CFG_SLIDE_IDX))
     config_slide.Shapes.Title.TextFrame.TextRange.Text = pRuleName
     config_slide.Name = pRuleName
     Set create_config_slide = config_slide
@@ -138,7 +161,3 @@ Private Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Vari
     parameter_row.Cells(2).shape.TextFrame.TextRange.Text = pConfigParameter(1)
     parameter_row.Cells(3).shape.TextFrame.TextRange.Text = pConfigParameter(2)
 End Sub
-
-Public Property Get Tags() As Variant
-    Tags = cTags
-End Property

@@ -25,7 +25,7 @@ Public Sub run_testcases(pTestCases As Variant, Optional pTags)
             Debug.Print ""
             Debug.Print "Test case: " & TypeName(testcase)
             Debug.Print vbTab & testcase.description & vbLf
-            testcase.test_scenarios
+            testcase.test_examples
             Set testcase = Nothing
         End If
     Next
@@ -45,7 +45,7 @@ Private Function test_has_tag(pTags As Variant, pTestCase As Variant)
     On Error GoTo error_handler
     test_has_tag = False
     input_tags = Split(Replace(pTags, " ", ""), ",")
-    feature_tags = Split(Replace(pTestCase.tags, " ", ""), ",")
+    feature_tags = Split(Replace(pTestCase.Tags, " ", ""), ",")
     For Each tag In input_tags
         match = Filter(feature_tags, tag, True, vbBinaryCompare)
         If UBound(match) > -1 Then
