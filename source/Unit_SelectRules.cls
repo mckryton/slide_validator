@@ -42,8 +42,8 @@ error_handler:
     SystemLogger.log_error "Unit_ReadConfig.test_scenarios"
 End Sub
 
-Public Function run_step(pcolStepProps As Collection) As String
-    
+Public Function run_step(pcolStepProps As Collection) As Variant
+        
     Dim step_result As String
     Dim config_table As Table
     
@@ -52,23 +52,25 @@ Public Function run_step(pcolStepProps As Collection) As String
         Case "Given a config slide"
             Set mTestPresentation = ActivePresentation
         Case Else
-            TExampleRunner.missingTest pcolStepProps.Item("step_type") & " " & Trim(pcolStepProps.Item("line_body")), Me
+            Err.Raise ERR_ID_STEP_IS_MISSING
     End Select
-    run_step = "OK"
+    run_step = Array("OK")
     Exit Function
 
 error_handler:
+    run_step = raise_step_error(Err.Number)
+End Function
+
+Private Function raise_step_error(pErrId As Long) As Variant
+ 
+    TExampleRunner.stop_test
     Select Case Err.Number
-    Case TSpec.ERR_ID_EXPECTATION_FAILED
-        TExampleRunner.stop_test
-        run_step = Err.description
-        Err.Clear
     Case ERR_ID_STEP_IS_PENDING
-        TExampleRunner.stop_test
-        run_step = "PENDING"
-        Err.Clear
+        raise_step_error = Array("PENDING")
+    Case ERR_ID_STEP_IS_MISSING
+        raise_step_error = Array("MISSING")
     Case Else
-        SystemLogger.log_error "Unit_ReadConfig.runStep " & pcolStepProps.Item("step_type") & " " & pcolStepProps.Item("line_body")
+        raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
 

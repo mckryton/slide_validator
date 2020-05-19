@@ -7,6 +7,7 @@ Option Explicit
 
 Public Const ERR_ID_SCENARIO_SYNTAX_ERROR = vbError + 6010
 Public Const ERR_ID_STEP_IS_PENDING = vbError + 6020
+Public Const ERR_ID_STEP_IS_MISSING = vbError + 6030
 
 Dim mTestStopped As Boolean
 
@@ -68,35 +69,18 @@ End Sub
 
 Private Sub run_step_line(pStepLine As Collection, pobjTestDefinition As Variant)
 
-    Dim step_result As String
+    Dim step_result As Variant
 
     Select Case pStepLine.Item("step_type")
     Case "Given", "When", "Then"
         step_result = pobjTestDefinition.run_step(pStepLine)
-        If step_result = "OK" Then
-            Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
-        ElseIf step_result = "PENDING" Or step_result = "MISSING" Then
-            Debug.Print vbTab & step_result, vbTab & pStepLine.Item("line")
-            End
-        Else
-            Debug.Print vbTab & "FAILED", vbTab & pStepLine.Item("line")
-            Debug.Print step_result
-            End
+        Debug.Print vbTab & step_result(0), vbTab & pStepLine.Item("line")
+        If step_result(0) = "FAILED" Then
+            Debug.Print vbTab & step_result(1)
         End If
     Case Else
         Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="unexpected step type " & pStepLine.Item("step_type")
     End Select
-End Sub
-
-Public Sub missingTest(pstrStepDefinition As String, pobjCaller As Object)
-
-    On Error GoTo error_handler
-    TExampleRunner.TestStopped = True
-    'Debug.Print vbCr & vbLf & "missing test step for >" & pstrStepDefinition & "<" & vbCr & vbLf & "  rule validator: " & TypeName(pobjCaller)
-    Exit Sub
-
-error_handler:
-    SystemLogger.log_error "TExampleRunner.missingTest " & pstrStepDefinition
 End Sub
 
 Public Function getExampleLine(pvarExample As Variant, pintLineIndex As Integer) As Collection

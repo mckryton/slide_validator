@@ -1,9 +1,9 @@
 Attribute VB_Name = "TSpec"
 Option Explicit
 
-Public Const ERR_ID_EXPECTATION_FAILED = vbError + 6000
+Public Const ERR_ID_EXPECTATION_FAILED = vbObjectError + 500
 
-Public Function expect(pvarGivenValue As Variant) As TSpecExpectation
+Public Function expect(pvarGivenValue As Variant) As Variant
 
     Dim expectation As Variant      'expectation uses type variant instead of TSpecExpectation
                                     '   because VBA will modify error description for errors

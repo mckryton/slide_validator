@@ -15,7 +15,12 @@ Public Sub to_be(pvarExpectedValue)
 
     Dim matcher_fail_msg As String
     
-    On Error GoTo error_handler
+    If (IsObject(Me.given_value) And Not IsObject(pvarExpectedValue)) _
+     Or (IsObject(pvarExpectedValue) And Not IsObject(Me.given_value)) Then
+        matcher_fail_msg = vbTab & "can't compare given with expected value - check if only one of them is an object"
+        raise_expectation_err matcher_fail_msg
+    End If
+    
     If IsObject(Me.given_value) Then
         If Not (Me.given_value Is pvarExpectedValue) Then
             matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
@@ -30,11 +35,6 @@ Public Sub to_be(pvarExpectedValue)
             raise_expectation_err matcher_fail_msg
         End If
     End If
-    Exit Sub
-    
-error_handler:
-    matcher_fail_msg = vbTab & "can't compare given with expected value - check if only one of them is an object"
-    raise_expectation_err matcher_fail_msg
 End Sub
 
 Public Property Get given_value() As Variant
@@ -74,5 +74,7 @@ End Sub
 
 Private Sub raise_expectation_err(pFailMsg)
     
-    Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, description:=pFailMsg
+    Err.Raise TSpec.ERR_ID_EXPECTATION_FAILED, pFailMsg, pFailMsg
+    Debug.Print ""
+    'Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Source:=pFailMsg, description:=pFailMsg
 End Sub
