@@ -74,7 +74,5 @@ End Sub
 
 Private Sub raise_expectation_err(pFailMsg)
     
-    Err.Raise TSpec.ERR_ID_EXPECTATION_FAILED, pFailMsg, pFailMsg
-    Debug.Print ""
-    'Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Source:=pFailMsg, description:=pFailMsg
+    Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Source:=pFailMsg, description:=pFailMsg
 End Sub
