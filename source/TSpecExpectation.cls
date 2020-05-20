@@ -11,31 +11,70 @@ Option Explicit
 
 Dim mvarGivenValue As Variant
 
-Public Sub to_be(pvarExpectedValue)
+Public Sub to_be(pExpectedValue)
 
     Dim matcher_fail_msg As String
     
-    If (IsObject(Me.given_value) And Not IsObject(pvarExpectedValue)) _
-     Or (IsObject(pvarExpectedValue) And Not IsObject(Me.given_value)) Then
-        matcher_fail_msg = vbTab & "can't compare given with expected value - check if only one of them is an object"
-        raise_expectation_err matcher_fail_msg
-    End If
+    test_comparability Me.given_value, pExpectedValue
     
-    If IsObject(Me.given_value) Then
-        If Not (Me.given_value Is pvarExpectedValue) Then
+    If Not values_are_equal(Me.given_value, pExpectedValue) Then
+        If IsObject(Me.given_value) Then
             matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
                                 vbTab & "can't match objects"
             raise_expectation_err matcher_fail_msg
-        End If
-    Else
-        If Me.given_value <> pvarExpectedValue Then
+        Else
             matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
                                 vbTab & "found:" & vbTab & vbTab & ">" & Me.given_value & "<" & vbLf & _
-                                vbTab & "expected:" & vbTab & ">" & pvarExpectedValue & "<"
+                                vbTab & "expected:" & vbTab & ">" & pExpectedValue & "<"
             raise_expectation_err matcher_fail_msg
         End If
     End If
 End Sub
+
+Public Sub not_to_be(pExpectedValue)
+
+    Dim matcher_fail_msg As String
+    
+    test_comparability Me.given_value, pExpectedValue
+    
+    If values_are_equal(Me.given_value, pExpectedValue) Then
+        If IsObject(Me.given_value) Then
+            matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
+                                vbTab & "compared objects match"
+            raise_expectation_err matcher_fail_msg
+        Else
+            matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
+                                vbTab & "found:" & vbTab & vbTab & ">" & Me.given_value & "<" & vbLf & _
+                                vbTab & "expected:" & vbTab & ">" & pExpectedValue & "<"
+            raise_expectation_err matcher_fail_msg
+        End If
+    End If
+End Sub
+
+Private Sub test_comparability(pGivenValue As Variant, pExpectedValue As Variant)
+    
+    Dim matcher_fail_msg As String
+    
+    If (IsObject(Me.given_value) And Not IsObject(pExpectedValue)) _
+     Or (IsObject(pExpectedValue) And Not IsObject(Me.given_value)) Then
+        matcher_fail_msg = vbTab & "can't compare given with expected value - check if only one of them is an object"
+        raise_expectation_err matcher_fail_msg
+    End If
+End Sub
+
+Private Function values_are_equal(pGivenValue As Variant, pExpectedValue As Variant) As Boolean
+    
+    values_are_equal = True
+    If IsObject(pGivenValue) Then
+        If Not (pGivenValue Is pExpectedValue) Then
+            values_are_equal = False
+        End If
+    Else
+        If pGivenValue <> pExpectedValue Then
+            values_are_equal = False
+        End If
+    End If
+End Function
 
 Public Property Get given_value() As Variant
     On Error Resume Next
@@ -76,3 +115,4 @@ Private Sub raise_expectation_err(pFailMsg)
     
     Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Source:=pFailMsg, description:=pFailMsg
 End Sub
+
