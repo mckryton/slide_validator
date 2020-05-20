@@ -63,11 +63,24 @@ Private Sub test_comparability(pGivenValue As Variant, pExpectedValue As Variant
 End Sub
 
 Private Function values_are_equal(pGivenValue As Variant, pExpectedValue As Variant) As Boolean
+
+    Dim index As Integer
     
     values_are_equal = True
     If IsObject(pGivenValue) Then
         If Not (pGivenValue Is pExpectedValue) Then
             values_are_equal = False
+        End If
+    ElseIf IsArray(pGivenValue) Then
+        If UBound(pGivenValue) <> UBound(pExpectedValue) Then
+            values_are_equal = False
+        Else
+            For index = 0 To UBound(pGivenValue)
+                If pGivenValue(index) <> pExpectedValue(index) Then
+                   values_are_equal = False
+                   Exit For
+                End If
+            Next
         End If
     Else
         If pGivenValue <> pExpectedValue Then
@@ -94,8 +107,7 @@ Public Sub contains(pvarExpectedItem As Variant)
 
     Dim matcher_fail_msg As String
     
-    Select Case TypeName(Me.given_value)
-    Case "Collection"
+    If TypeName(Me.given_value) = "Collection" Then
         If Not ExtraVBA.existsItem(pvarExpectedItem(0), Me.given_value) Then
             matcher_fail_msg = vbTab & "missed expectation" & vbLf & _
                         vbTab & "collection does not contain item " & ">" & pvarExpectedItem(0) & "<"
@@ -106,9 +118,9 @@ Public Sub contains(pvarExpectedItem As Variant)
                         vbTab & "expected:" & vbTab & ">" & pvarExpectedItem(1) & "<"
             raise_expectation_err matcher_fail_msg
         End If
-    Case "Array"
+    ElseIf IsArray(Me.given_value) Then
         TExampleRunner.pending "contains matcher for array"
-    End Select
+    End If
 End Sub
 
 Private Sub raise_expectation_err(pFailMsg)
