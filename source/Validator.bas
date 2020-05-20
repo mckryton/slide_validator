@@ -7,7 +7,7 @@ Option Explicit
 Const mcRuleCheckAuthor = "Slide Validator"
 Const mcRuleCheckInitials = "bot"
 
-Public Sub run_slide_validator(Optional pTargetPresentation, Optional pvarRules)
+Public Sub validate_slides(Optional pTargetPresentation, Optional pvarRules)
 
     Dim sldCurrent As Slide
 
@@ -105,7 +105,7 @@ End Sub
 Public Function read_config(pRuleName As String, Optional pConfigPresentation) As Collection
     
     Dim rule_config As Collection
-    Dim config_presentation As presentation
+    Dim config_presentation As Presentation
     Dim config_slide As Slide
     Dim config_table As Table
     
@@ -125,7 +125,7 @@ Public Function read_config(pRuleName As String, Optional pConfigPresentation) A
     Set read_config = rule_config
 End Function
 
-Private Function get_config_slide(pstrRuleName As String, pConfigPresentation As presentation) As Slide
+Private Function get_config_slide(pstrRuleName As String, pConfigPresentation As Presentation) As Slide
 
     Dim config_slide As Slide
     Dim slide_title As String
@@ -164,7 +164,7 @@ Private Function read_config_from_table(pConfigTable As Table) As Collection
     Set config_parameters = New Collection
     For row_nr = 2 To pConfigTable.Rows.Count
         Set config_row = pConfigTable.Rows(row_nr)
-        config_parameters.Add Trim(config_row.Cells(2).shape.TextFrame.TextRange), Trim(config_row.Cells(1).shape.TextFrame.TextRange)
+        config_parameters.Add Array(Trim(config_row.Cells(1).shape.TextFrame.TextRange), Trim(config_row.Cells(2).shape.TextFrame.TextRange))
     Next
     Set read_config_from_table = config_parameters
 End Function
@@ -182,7 +182,7 @@ End Function
 Public Function get_target_presentations_info_info() As Collection
     
     Dim target_presentation_names As Collection
-    Dim open_presentation As presentation
+    Dim open_presentation As Presentation
     
     Set target_presentation_names = New Collection
     For Each open_presentation In Application.Presentations
@@ -193,7 +193,7 @@ Public Function get_target_presentations_info_info() As Collection
     Set get_target_presentations_info_info = target_presentation_names
 End Function
 
-Public Property Get ValidationTarget() As presentation
+Public Property Get ValidationTarget() As Presentation
     
     Dim selection_form As SelectValidationTarget
     

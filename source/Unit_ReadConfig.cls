@@ -30,7 +30,7 @@ Public Sub test_examples()
     On Error GoTo error_handler
     scenarios = Array( _
                     Array("Scenario: config with one parameter", _
-                           "Given a config slide for the Feature_FontWhiteList", _
+                           "Given a config slide for the rule FontWhiteList", _
                            "And the config slide contains the parameter AllowedFonts with the value Arial", _
                            "When the configuration for the Feature_FontWhiteList is read", _
                            "Then the value for the parameter AllowedFonts is set to Arial" _
@@ -53,7 +53,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
-        Case "Given a config slide for the Feature_FontWhiteList"
+        Case "Given a config slide for the rule FontWhiteList"
            Set mTestPresentation = create_config_presentation
            Set mConfigSlide = create_config_slide(mTestPresentation, "FontWhiteList")
            
@@ -62,11 +62,12 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
             
         Case "When the configuration for the Feature_FontWhiteList is read"
-            pending "read config"
-            'Set mRuleConfig = Validator.read_config("Feature_FontWhiteList", mTestPresentation)
+            Set mRuleConfig = Validator.read_config("FontWhiteList", mTestPresentation)
+            TSpec.expect(TypeName(mRuleConfig)).to_be "Collection"
             
         Case "Then the value for the parameter AllowedFonts is set to Arial"
-            TSpec.expect(mRuleConfig).contains Array("AllowedFonts", "Arial")
+            TSpec.expect(IsArray(mRuleConfig(1))).to_be True
+            TSpec.expect(mRuleConfig(1)).to_be Array("AllowedFonts", "Arial")
         
         Case Else
             Err.Raise ERR_ID_STEP_IS_MISSING
