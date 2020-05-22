@@ -12,8 +12,8 @@ Attribute VB_Exposed = False
 '------------------------------------------------------------------------
 Option Explicit
 
-'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = "@debug"
+'separate tags by comma, e.g.: "debug,production"
+Const cTags = "wip"
 
 Dim mobjRuleFontWhiteList As Rule_FontWhiteList
 Dim mpreTestPresentation As Presentation
@@ -21,18 +21,23 @@ Dim mpreTestPresentation As Presentation
 
 Public Sub test_examples()
 
-    Dim scenario As Variant
+    Dim examples As Variant
+    Dim example As Variant
 
     On Error GoTo error_handler
-    scenario = Array("Scenario: one slide with valid and one slide with invalid font", _
-                       "Given a font white list rule listing Arial", _
-                       "And a new presentation", _
-                       "And it contains a slide with a textbox using Arial", _
-                       "And it contains a slide with a textbox using Times New Roman", _
-                       "When the rule is applied to the presentation", _
-                       "Then a comment about the rule validation is added to the second slide" _
-                    )
-    TExampleRunner.run_example scenario, Me
+    examples = Array( _
+                    Array("Example: one slide with valid and one slide with invalid font", _
+                           "Given a font white list rule listing Arial", _
+                           "And a new presentation", _
+                           "And it contains a slide with a textbox using Arial", _
+                           "And it contains a slide with a textbox using Times New Roman", _
+                           "When the rule is applied to the presentation", _
+                           "Then a comment about the rule validation is added to the second slide" _
+                        ) _
+                )
+    For Each example In examples
+        TExampleRunner.run_example example, Me
+    Next
     Exit Sub
 
 error_handler:
@@ -42,23 +47,32 @@ End Sub
 Public Function run_step(pcolStepProps As Collection) As Variant
     
     Dim step_result As String
+    Dim rule_config As Collection
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
         Case "Given a font white list rule listing Arial"
             Set mobjRuleFontWhiteList = New Rule_FontWhiteList
-            mobjRuleFontWhiteList.create_white_list "Arial"
+            Set rule_config = New Collection
+            rule_config.Add "Arial", "AllowedFonts"
+            mobjRuleFontWhiteList.Config = rule_config
+            
         Case "Given a new presentation"
             Set mpreTestPresentation = Application.Presentations.Add
+            
         Case "Given it contains a slide with a textbox using Arial"
             add_slide_with_textbox mpreTestPresentation, "Arial"
+            
         Case "Given it contains a slide with a textbox using Times New Roman"
             add_slide_with_textbox mpreTestPresentation, "Times New Roman"
+            
         Case "When the rule is applied to the presentation"
             Validator.validate_slides mpreTestPresentation, Array(mobjRuleFontWhiteList)
+            
         Case "Then a comment about the rule validation is added to the second slide"
             TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 1
             TSpec.expect(mpreTestPresentation.Slides(2).Comments.Count).to_be 0
+            
         Case Else
             Err.Raise ERR_ID_STEP_IS_MISSING
     End Select
@@ -108,7 +122,7 @@ Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontNam
     On Error GoTo error_handler
     Set slide_with_textbox = pprePresentation.Slides.AddSlide(1, pprePresentation.SlideMaster.CustomLayouts(7))
     Set textbox = slide_with_textbox.Shapes.AddTextbox(msoTextOrientationHorizontal, 200, 200, 400, 200)
-    textbox.TextFrame.TextRange.Font.Name = pstrFontName
+    textbox.TextFrame.TextRange.font.Name = pstrFontName
     textbox.TextFrame.TextRange.Text = "This text is using " & pstrFontName & " as font."
     Exit Sub
     

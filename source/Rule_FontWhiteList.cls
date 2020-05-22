@@ -9,18 +9,24 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Dim mcolFontWhiteList As Collection
+Dim mWhiteList As Collection
+Dim mConfig As Collection
 
-Private Sub Class_Initialize()
-    Set mcolFontWhiteList = New Collection
-End Sub
 
 Private Sub Class_Terminate()
-    Set mcolFontWhiteList = Nothing
+    Set mWhiteList = Nothing
+    Set mConfig = Nothing
 End Sub
 
-Public Property Get font_white_list() As Collection
-    Set font_white_list = mcolFontWhiteList
+Private Property Get white_list() As Collection
+
+    Dim fonts As Variant
+    Dim font As String
+    
+    If TypeName(mWhiteList) = "Nothing" Then
+        Set mWhiteList = create_white_list(Me.Config("AllowedFonts"))
+    End If
+    Set white_list = mWhiteList
 End Property
 
 Public Function apply_rule(psldCurrentSlide As Slide) As String
@@ -31,29 +37,40 @@ Public Function apply_rule(psldCurrentSlide As Slide) As String
     violations = ""
     For Each shape In psldCurrentSlide.Shapes
         If shape.TextFrame.HasText Then
-            If Not ExtraVBA.existsItem(shape.TextFrame2.TextRange.Font.Name, Me.font_white_list) Then
-                violations = violations & "illegal font >" & shape.TextFrame2.TextRange.Font.Name & "< in shape " & shape.Name & vbCrLf
+            If Not ExtraVBA.existsItem(shape.TextFrame2.TextRange.font.Name, white_list) Then
+                violations = violations & "illegal font >" & shape.TextFrame2.TextRange.font.Name & "< in shape " & shape.Name & vbCrLf
             End If
         End If
     Next
     apply_rule = violations
 End Function
 
-Public Sub create_white_list(pFontWhiteList_Config_String As String)
+Private Function create_white_list(pWhiteList_Config_String As String) As Collection
     
     Dim white_list_config As Variant
     Dim font_name As Variant
+    Dim new_white_list As Collection
     
-    Me.clear_white_list
-    white_list_config = Split(pFontWhiteList_Config_String, ",")
+    Set new_white_list = New Collection
+    white_list_config = Split(pWhiteList_Config_String, ",")
     For Each font_name In white_list_config
-        Me.font_white_list.Add Trim(font_name), Trim(font_name)
+        new_white_list.Add Trim(font_name), Trim(font_name)
     Next
-End Sub
+    Set create_white_list = new_white_list
+End Function
 
-Public Sub clear_white_list()
-    
-    Do While Me.font_white_list.Count > 0
-        Me.font_white_list.Remove 0
-    Loop
-End Sub
+
+Public Property Get Config() As Collection
+
+    If TypeName(mConfig) = "Nothing" Then
+        Set mConfig = New Collection
+        mConfig.Add "", "AllowedFonts"
+    End If
+    Set Config = mConfig
+End Property
+
+Public Property Let Config(ByVal pConfig As Collection)
+    Set mConfig = pConfig
+    'a new config will reset the white list
+    Set mWhiteList = Nothing
+End Property
