@@ -23,6 +23,13 @@ Dim mSlideValidatorConfig As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
 
+Public Property Get description() As String
+
+    description = "Slide Validator will read all config parameters from it's own slides" & vbLf & _
+                    vbTab & "Configuration slides will use the name of the feature class as headline." & vbLf & _
+                    vbTab & "A table with 3 columns for parameter name, value and description will held the config."
+End Property
+
 Public Sub test_examples()
 
     Dim scenarios As Variant
@@ -91,13 +98,6 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
-
-Public Property Get description() As String
-
-    description = "Slide Validator will read all config parameters from it's own slides" & vbLf & _
-                    vbTab & "Configuration slides will use the name of the feature class as headline." & vbLf & _
-                    vbTab & "A table with 3 columns for parameter name, value and description will held the config."
-End Property
 
 Public Sub after()
     If TypeName(mSlideValidatorConfig) <> "Nothing" Then

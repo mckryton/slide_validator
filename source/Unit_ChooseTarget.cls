@@ -19,6 +19,13 @@ Dim mLogger As Logger
 Dim mOpenTestPresentations As Collection
 Dim mTargetSelectionForm As SelectValidationTarget
 
+Public Property Get description() As String
+
+    description = "If only one presentation is available for validation, Slide Validator will " & vbLf _
+                    & "validate this automatically. Otherwise a dialog will present as list with names " & vbLf _
+                    & "of possible validation candidates."
+End Property
+
 Public Sub test_examples()
 
     Dim scenarios As Variant
@@ -26,6 +33,7 @@ Public Sub test_examples()
 
     On Error GoTo error_handler
     scenarios = Array( _
+                    Array("Rule: if only one presentation for validation is available, don't ask the user to select a target"), _
                     Array("Scenario: more than one possible target presentation opened", _
                            "Given two presentations opened in addition to Slide Validator", _
                            "When the validator is looking for available validation targets", _
@@ -105,13 +113,6 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
-
-Public Property Get description() As String
-
-    description = "If only one presentation is available for validation, Slide Validator will " & vbLf _
-                    & "validate this automatically. Otherwise a dialog will present as list with names " & vbLf _
-                    & "of possible validation candidates."
-End Property
 
 Public Sub after()
 

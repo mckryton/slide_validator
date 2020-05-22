@@ -19,6 +19,11 @@ Dim mLogger As Logger
 Dim mobjRuleFontWhiteList As Rule_FontWhiteList
 Dim mpreTestPresentation As Presentation
 
+Public Property Get description() As String
+
+    description = "The presentation should only use fonts listed in a white list"
+End Property
+
 Public Sub test_examples()
 
     Dim examples As Variant
@@ -95,11 +100,6 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
-
-Public Property Get description() As String
-
-    description = "The presentation should only use fonts listed in a white list"
-End Property
 
 Public Sub after()
     mpreTestPresentation.Saved = msoTrue

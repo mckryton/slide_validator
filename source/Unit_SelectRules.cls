@@ -20,6 +20,12 @@ Dim mTestPresentation As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
 
+Public Property Get description() As String
+x
+    description = "Slide Validator will find configuration for rule from it's own slides" & vbLf & _
+                    vbTab & "and apply configuration found to matching rules"
+End Property
+
 Public Sub test_examples()
 
     Dim scenarios As Variant
@@ -74,12 +80,6 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
-
-Public Property Get description() As String
-
-    description = "Slide Validator will find configuration for rule from it's own slides" & vbLf & _
-                    vbTab & "and apply configuration found to matching rules"
-End Property
 Public Sub after()
     If TypeName(mTestPresentation) <> "Nothing" Then
         mTestPresentation.Saved = msoTrue

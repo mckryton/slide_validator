@@ -16,6 +16,12 @@ Const cTags = ""
 
 Dim mLogger As Logger
 
+Public Property Get description() As String
+
+    description = "Add a description" & vbLf & _
+                    vbTab & "to explain your features purpose."
+End Property
+
 Public Sub test_examples()
 
     Dim scenarios As Variant
@@ -76,12 +82,6 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
-
-Public Property Get description() As String
-
-    description = "Add a description" & vbLf & _
-                    vbTab & "to explain your features purpose."
-End Property
 
 Public Sub after()
 
