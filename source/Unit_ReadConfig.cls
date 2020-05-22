@@ -18,7 +18,7 @@ Const cTags = "wip"
 Const RULE_CFG_SLIDE_IDX = 2
 Const ERR_ID_MISSING_CFG_MASTER_SLIDE = vbError + 7000
 
-Dim mTestPresentation As Presentation
+Dim mSlideValidatorConfig As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
 
@@ -29,8 +29,9 @@ Public Sub test_examples()
 
     On Error GoTo error_handler
     scenarios = Array( _
-                    Array("Scenario: config with one parameter", _
-                           "Given a config slide for the rule FontWhiteList", _
+                    Array("Rule: convert the the content of the first two columns of the the config table into key value pairs"), _
+                    Array("Example: config with one parameter", _
+                           "Given a SlideValidator Setup with a config slide for the rule FontWhiteList", _
                            "And the config slide contains the parameter AllowedFonts with the value Arial", _
                            "When the configuration for the Feature_FontWhiteList is read", _
                            "Then the value for the parameter AllowedFonts is set to Arial" _
@@ -53,21 +54,20 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
-        Case "Given a config slide for the rule FontWhiteList"
-           Set mTestPresentation = create_config_presentation
-           Set mConfigSlide = create_config_slide(mTestPresentation, "FontWhiteList")
+        Case "Given a SlideValidator Setup with a config slide for the rule FontWhiteList"
+           Set mSlideValidatorConfig = create_slide_validator_config
+           Set mConfigSlide = create_config_slide(mSlideValidatorConfig, "FontWhiteList")
            
         Case "Given the config slide contains the parameter AllowedFonts with the value Arial"
             Set config_table = create_config_table(mConfigSlide)
             add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
             
         Case "When the configuration for the Feature_FontWhiteList is read"
-            Set mRuleConfig = Validator.read_config("FontWhiteList", mTestPresentation)
+            Set mRuleConfig = Validator.read_config("FontWhiteList", mSlideValidatorConfig)
             TSpec.expect(TypeName(mRuleConfig)).to_be "Collection"
             
         Case "Then the value for the parameter AllowedFonts is set to Arial"
-            TSpec.expect(IsArray(mRuleConfig(1))).to_be True
-            TSpec.expect(mRuleConfig(1)).to_be Array("AllowedFonts", "Arial")
+            TSpec.expect(mRuleConfig("AllowedFonts")).to_be "Arial"
         
         Case Else
             Err.Raise ERR_ID_STEP_IS_MISSING
@@ -100,9 +100,9 @@ Public Property Get description() As String
 End Property
 
 Public Sub after()
-    If TypeName(mTestPresentation) <> "Nothing" Then
-        mTestPresentation.Saved = msoTrue
-        mTestPresentation.Close
+    If TypeName(mSlideValidatorConfig) <> "Nothing" Then
+        mSlideValidatorConfig.Saved = msoTrue
+        mSlideValidatorConfig.Close
     End If
 End Sub
 
@@ -114,7 +114,7 @@ Private Sub pending(pPendingMsg)
     Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
-Private Function create_config_presentation() As Presentation
+Private Function create_slide_validator_config() As Presentation
 
     Dim config_presentation As Presentation
     Dim slide_validator As Presentation
@@ -131,11 +131,11 @@ Private Function create_config_presentation() As Presentation
     master_slide.Copy
     config_presentation.SlideMaster.CustomLayouts.Paste RULE_CFG_SLIDE_IDX
     
-    Set create_config_presentation = config_presentation
+    Set create_slide_validator_config = config_presentation
     Exit Function
     
 error_handler:
-    SystemLogger.log_error "clsFeatureFontWhiteList.create_config_presentation"
+    SystemLogger.log_error "clsFeatureFontWhiteList.create_slide_validator_config"
 End Function
 
 Private Function create_config_slide(pConfigPresentation As Presentation, pRuleName As String) As Slide
