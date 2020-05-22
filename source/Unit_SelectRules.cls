@@ -15,6 +15,7 @@ Option Explicit
 'separate tags by comma, e.g.: "@debug,@production"
 Const cTags = ""
 
+Dim mLogger As Logger
 Dim mTestPresentation As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
@@ -92,4 +93,20 @@ End Property
 
 Private Sub pending(pPendingMsg)
     Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+End Sub
+
+Private Property Get Log() As Logger
+    
+    If TypeName(mLogger) = "Nothing" Then
+        Set mLogger = New Logger
+    End If
+    Set Log = mLogger
+End Property
+
+Public Property Let Log(ByVal pLogger As Logger)
+    Set mLogger = pLogger
+End Property
+
+Private Sub Class_Terminate()
+    Set mLogger = Nothing
 End Sub

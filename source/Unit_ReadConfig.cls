@@ -18,6 +18,7 @@ Const cTags = "wip"
 Const RULE_CFG_SLIDE_IDX = 2
 Const ERR_ID_MISSING_CFG_MASTER_SLIDE = vbError + 7000
 
+Dim mLogger As Logger
 Dim mSlideValidatorConfig As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
@@ -43,12 +44,11 @@ Public Sub test_examples()
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Unit_ReadConfig.test_scenarios"
+    Log.log_function_error "Unit_ReadConfig.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant
     
-    Dim step_result As String
     Dim config_table As Table
     
     On Error GoTo error_handler
@@ -114,6 +114,18 @@ Private Sub pending(pPendingMsg)
     Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
+Private Property Get Log() As Logger
+    
+    If TypeName(mLogger) = "Nothing" Then
+        Set mLogger = New Logger
+    End If
+    Set Log = mLogger
+End Property
+
+Public Property Let Log(ByVal pLogger As Logger)
+    Set mLogger = pLogger
+End Property
+
 Private Function create_slide_validator_config() As Presentation
 
     Dim config_presentation As Presentation
@@ -135,7 +147,7 @@ Private Function create_slide_validator_config() As Presentation
     Exit Function
     
 error_handler:
-    SystemLogger.log_error "clsFeatureFontWhiteList.create_slide_validator_config"
+    Log.log_function_error "clsFeatureFontWhiteList.create_slide_validator_config"
 End Function
 
 Private Function create_config_slide(pConfigPresentation As Presentation, pRuleName As String) As Slide
@@ -167,5 +179,9 @@ Private Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Vari
     parameter_row.Cells(1).shape.TextFrame.TextRange.Text = pConfigParameter(0)
     parameter_row.Cells(2).shape.TextFrame.TextRange.Text = pConfigParameter(1)
     parameter_row.Cells(3).shape.TextFrame.TextRange.Text = pConfigParameter(2)
+End Sub
+
+Private Sub Class_Terminate()
+    Set mLogger = Nothing
 End Sub
 

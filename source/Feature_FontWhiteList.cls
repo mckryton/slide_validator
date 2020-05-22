@@ -15,9 +15,9 @@ Option Explicit
 'separate tags by comma, e.g.: "debug,production"
 Const cTags = "wip"
 
+Dim mLogger As Logger
 Dim mobjRuleFontWhiteList As Rule_FontWhiteList
 Dim mpreTestPresentation As Presentation
-
 
 Public Sub test_examples()
 
@@ -41,7 +41,7 @@ Public Sub test_examples()
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "clsFeatureFontWhiteList.runTest"
+    Log.log_function_error "clsFeatureFontWhiteList.runTest"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant
@@ -114,6 +114,18 @@ Private Sub pending(pPendingMsg)
     Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
+Private Property Get Log() As Logger
+    
+    If TypeName(mLogger) = "Nothing" Then
+        Set mLogger = New Logger
+    End If
+    Set Log = mLogger
+End Property
+
+Public Property Let Log(ByVal pLogger As Logger)
+    Set mLogger = pLogger
+End Property
+
 Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
 
     Dim slide_with_textbox As Slide
@@ -127,5 +139,10 @@ Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontNam
     Exit Sub
     
 error_handler:
-    SystemLogger.log_error "clsFeatureFontWhiteList.add_slide_with_textbox"
+    Log.log_function_error "clsFeatureFontWhiteList.add_slide_with_textbox"
 End Sub
+
+Private Sub Class_Terminate()
+    Set mLogger = Nothing
+End Sub
+
