@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = "wip"
+Const cTags = ""
 
 Const RULE_CFG_SLIDE_IDX = 2
 Const ERR_ID_MISSING_CFG_MASTER_SLIDE = vbError + 7000
@@ -62,22 +62,22 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
         Case "Given a SlideValidator Setup with a config slide for the rule FontWhiteList"
-           Set mSlideValidatorConfig = create_slide_validator_config
-           Set mConfigSlide = create_config_slide(mSlideValidatorConfig, "FontWhiteList")
+            Set mSlideValidatorConfig = create_slide_validator_config
+            Set mConfigSlide = create_config_slide(mSlideValidatorConfig, "FontWhiteList")
            
         Case "Given the config slide contains the parameter AllowedFonts with the value Arial"
             Set config_table = create_config_table(mConfigSlide)
             add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
             
         Case "When the configuration for the Feature_FontWhiteList is read"
-            Set mRuleConfig = Validator.read_config("FontWhiteList", mSlideValidatorConfig)
+            Set mRuleConfig = Validator.read_config(mConfigSlide)
             TSpec.expect(TypeName(mRuleConfig)).to_be "Collection"
             
         Case "Then the value for the parameter AllowedFonts is set to Arial"
             TSpec.expect(mRuleConfig("AllowedFonts")).to_be "Arial"
         
         Case Else
-            Err.Raise ERR_ID_STEP_IS_MISSING
+            Err.raise ERR_ID_STEP_IS_MISSING
     End Select
     run_step = Array("OK")
     Exit Function
@@ -111,7 +111,7 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pPendingMsg)
-    Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+    Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
 Private Property Get Log() As Logger
@@ -138,7 +138,7 @@ Private Function create_slide_validator_config() As Presentation
     
     Set master_slide = slide_validator.SlideMaster.CustomLayouts(RULE_CFG_SLIDE_IDX)
     If master_slide.Name <> "rule_config" Then
-        Err.Raise ERR_ID_MISSING_CFG_MASTER_SLIDE, description = "could not find rule_config at idx " & RULE_CFG_SLIDE_IDX & " found >" & master_slide.Name & "< instead"
+        Err.raise ERR_ID_MISSING_CFG_MASTER_SLIDE, description = "could not find rule_config at idx " & RULE_CFG_SLIDE_IDX & " found >" & master_slide.Name & "< instead"
     End If
     master_slide.Copy
     config_presentation.SlideMaster.CustomLayouts.Paste RULE_CFG_SLIDE_IDX

@@ -4,8 +4,8 @@ Attribute VB_Name = "Validator"
 '------------------------------------------------------------------------
 Option Explicit
 
-Const mcRuleCheckAuthor = "Slide Validator"
-Const mcRuleCheckInitials = "bot"
+Const COMMENT_AUTHOR = "Slide Validator"
+Const COMMENT_INITIALS = "bot"
 
 Public Sub validate_slides(Optional pTargetPresentation, Optional pvarRules)
 
@@ -23,15 +23,15 @@ Public Sub validate_slides(Optional pTargetPresentation, Optional pvarRules)
         'TODO: add function to setup all rules
         pvarRules = Array()
     End If
-    'comments from earlier validations may not reflect the current content
-    Validator.cleanup_violation_messages
+    'remove comments from earlier validations because they may not reflect the current content
+    Validator.cleanup_violation_comments
     For Each sldCurrent In pTargetPresentation.Slides
         'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
-            SystemLogger.log "apply rules to slide " & sldCurrent.SlideIndex
+            SystemLogger.Log "apply rules to slide " & sldCurrent.SlideIndex
             apply_rules pvarRules, sldCurrent
         Else
-            SystemLogger.log "skip hidden slide " & sldCurrent.SlideIndex
+            SystemLogger.Log "skip hidden slide " & sldCurrent.SlideIndex
         End If
     Next
     Exit Sub
@@ -65,28 +65,28 @@ Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As St
     On Error GoTo error_handler
     'improve visibility by putting all comments for violation messages in a row
     lngCommentPosX = 10 * (psldValidatedSlide.Comments.Count + 1)
-    psldValidatedSlide.Comments.Add lngCommentPosX, 10, mcRuleCheckAuthor, mcRuleCheckInitials, pstrViolationMessage
+    psldValidatedSlide.Comments.Add lngCommentPosX, 10, COMMENT_AUTHOR, COMMENT_INITIALS, pstrViolationMessage
     Exit Sub
 
 error_handler:
     SystemLogger.log_error "Validator.add_violation"
 End Sub
 
-Private Sub cleanup_violation_messages()
+Private Sub cleanup_violation_comments()
 
     Dim sldCurrent As Slide
     Dim comCurrentMsg As Comment
     Dim colOldMessages As Collection      'comment objects for old violation messages
     
     On Error GoTo error_handler
-    SystemLogger.log "delete old violation messages"
+    SystemLogger.Log "delete old violation messages"
     For Each sldCurrent In ActivePresentation.Slides
         'ignore hidden slides
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
             Set colOldMessages = New Collection
             'Powerpoint has problems deleting comments inside a for each loop from the comments property
             For Each comCurrentMsg In sldCurrent.Comments
-                If comCurrentMsg.Author = mcRuleCheckAuthor Then
+                If comCurrentMsg.Author = COMMENT_AUTHOR Then
                     colOldMessages.Add comCurrentMsg
                 End If
             Next
@@ -102,44 +102,17 @@ error_handler:
     SystemLogger.log_error "Validator.cleanup_violation_messages"
 End Sub
 
-Public Function read_config(pRuleName As String, Optional pConfigPresentation) As Collection
+Public Function read_config(pConfigSlide As Slide) As Collection
     
-    Dim rule_config As Collection
-    Dim config_presentation As Presentation
-    Dim config_slide As Slide
     Dim config_table As Table
     
-    Set rule_config = New Collection
-    If IsMissing(pConfigPresentation) Then
-        Set config_presentation = Presentations("SlideValidator.pptm")
+    Set config_table = get_config_table(pConfigSlide)
+    If TypeName(config_table) <> "Nothing" Then
+        Set read_config = read_config_from_table(config_table)
     Else
-        Set config_presentation = pConfigPresentation
+        'return an empty collection to be able to count available settings in any case
+        Set read_config = New Collection
     End If
-    Set config_slide = get_config_slide(pRuleName, config_presentation)
-    If TypeName(config_slide) <> "Nothing" Then
-        Set config_table = get_config_table(config_slide)
-        If TypeName(config_table) <> "Nothing" Then
-            Set rule_config = read_config_from_table(config_table)
-        End If
-    End If
-    Set read_config = rule_config
-End Function
-
-Private Function get_config_slide(pstrRuleName As String, pConfigPresentation As Presentation) As Slide
-
-    Dim config_slide As Slide
-    Dim slide_title As String
-    
-    For Each config_slide In pConfigPresentation.Slides
-        slide_title = ""
-        On Error Resume Next
-        slide_title = Trim(config_slide.Shapes.Title.TextFrame.TextRange.Text)
-        If slide_title = pstrRuleName Then
-            Set get_config_slide = config_slide
-            Exit Function
-        End If
-    Next
-    Set get_config_slide = Nothing
 End Function
 
 Private Function get_config_table(pConfigSlide As Slide) As Table
@@ -160,15 +133,18 @@ Private Function read_config_from_table(pConfigTable As Table) As Collection
     Dim config_row As Row
     Dim row_nr As Long
     Dim config_parameters As Collection
+    Dim param_name As String
+    Dim param_value As String
     
     Set config_parameters = New Collection
     For row_nr = 2 To pConfigTable.Rows.Count
         Set config_row = pConfigTable.Rows(row_nr)
-        config_parameters.Add Array(Trim(config_row.Cells(1).shape.TextFrame.TextRange), Trim(config_row.Cells(2).shape.TextFrame.TextRange))
+        param_name = Trim(config_row.Cells(1).shape.TextFrame.TextRange)
+        param_value = Trim(config_row.Cells(2).shape.TextFrame.TextRange)
+        config_parameters.Add param_value, param_name
     Next
     Set read_config_from_table = config_parameters
 End Function
-
 
 Public Function get_validation_target_form() As SelectValidationTarget
 
