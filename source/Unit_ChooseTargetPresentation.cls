@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Unit_ChooseTarget"
+Attribute VB_Name = "Unit_ChooseTargetPresentation"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -92,7 +92,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             TSpec.expect(TypeName(Validator.ValidationTarget)).to_be "Nothing"
             
         Case Else
-            Err.Raise ERR_ID_STEP_IS_MISSING
+            Err.raise ERR_ID_STEP_IS_MISSING
     End Select
     run_step = Array("OK")
     Exit Function
@@ -132,7 +132,7 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pPendingMsg)
-    Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+    Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
 Private Property Get Log() As Logger
