@@ -16,7 +16,6 @@ Option Explicit
 Const cTags = ""
 
 Const RULE_CFG_SLIDE_IDX = 2
-Const ERR_ID_MISSING_CFG_MASTER_SLIDE = vbError + 7000
 
 Dim mLogger As Logger
 Dim mSlideValidatorConfig As Presentation
@@ -148,16 +147,6 @@ Private Function create_slide_validator_config() As Presentation
     
 error_handler:
     Log.log_function_error "clsFeatureFontWhiteList.create_slide_validator_config"
-End Function
-
-Private Function create_config_slide(pConfigPresentation As Presentation, pRuleName As String) As Slide
-    
-    Dim config_slide As Slide
-    
-    Set config_slide = pConfigPresentation.Slides.AddSlide(1, pConfigPresentation.SlideMaster.CustomLayouts(RULE_CFG_SLIDE_IDX))
-    config_slide.Shapes.Title.TextFrame.TextRange.Text = pRuleName
-    config_slide.Name = pRuleName
-    Set create_config_slide = config_slide
 End Function
 
 Private Function create_config_table(pConfigSlide As Slide) As Table

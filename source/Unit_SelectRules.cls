@@ -13,35 +13,45 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = ""
+Const cTags = "wip"
 
 Dim mLogger As Logger
 Dim mTestPresentation As Presentation
-Dim mConfigSlide As Slide
+Dim mTestConfigSlide As Slide
 Dim mRuleConfig As Collection
+Dim mIsConfigSlide As Boolean
 
 Public Property Get description() As String
-x
+
     description = "Slide Validator will find configuration for rule from it's own slides" & vbLf & _
                     vbTab & "and apply configuration found to matching rules"
 End Property
 
 Public Sub test_examples()
 
-    Dim scenarios As Variant
-    Dim scenario As Variant
+    Dim examples As Variant
+    Dim example As Variant
 
     On Error GoTo error_handler
-    scenarios = Array( _
+    examples = Array( _
                     Array("Rule: A slide is a configuration slide if it's layout is named Rule_Config"), _
-                    Array("Scenario: valid configuration slide", _
-                           "Given a config slide", _
+                    Array("Example: valid configuration slide", _
+                           "Given a config slide using the master slide template for rule config", _
                            "When the slide is validated to be a configuration", _
                            "Then the validation result confirms the configuration" _
+                    ), _
+                    Array("Rule: Ignore hidden config slides"), _
+                    Array("Rule: Choose Rule from config slide title"), _
+                    Array("Example: config slide has a matching rule", _
+                            "Given a SlideValidator having a config slide titled FontWhiteList", _
+                            "And a matching Rule named Rule_FontWhiteList", _
+                            "And a target presentation using Times New Roman for a text", _
+                            "When the target presentation is validated", _
+                            "Then the rule is applied to the target presentation" _
                     ) _
                 )
-    For Each scenario In scenarios
-        TExampleRunner.run_example scenario, Me
+    For Each example In examples
+        TExampleRunner.run_example example, Me
     Next
     Exit Sub
 
@@ -56,10 +66,15 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
-        Case "Given a config slide"
+        
+        Case "Given a config slide using the master slide template for rule config"
             Set mTestPresentation = ActivePresentation
+            
+        Case "When the slide is validated to be a configuration"
+            mIsConfigSlide = Validator.is_config_slide(mTestConfigSlide)
+        
         Case Else
-            Err.Raise ERR_ID_STEP_IS_MISSING
+            Err.raise ERR_ID_STEP_IS_MISSING
     End Select
     run_step = Array("OK")
     Exit Function
@@ -92,7 +107,7 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pPendingMsg)
-    Err.Raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+    Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
 End Sub
 
 Private Property Get Log() As Logger

@@ -4,6 +4,10 @@ Attribute VB_Name = "Validator"
 '------------------------------------------------------------------------
 Option Explicit
 
+Public Const CONFIG_TEMPLATE_NAME = "rule_config"
+
+Public Const ERR_ID_MISSING_CFG_MASTER_SLIDE = vbError + 7000
+
 Const COMMENT_AUTHOR = "Slide Validator"
 Const COMMENT_INITIALS = "bot"
 
@@ -183,3 +187,11 @@ Public Property Get ValidationTarget() As Presentation
     End If
 End Property
 
+Public Function is_config_slide(pConfigSlide As Slide) As Boolean
+
+    If pConfigSlide.Master.Name = "rule_config" Then
+        is_config_slide = True
+    Else
+        is_config_slide = False
+    End If
+End Function

@@ -125,6 +125,6 @@ End Sub
 
 Private Sub raise_expectation_err(pFailMsg)
     
-    Err.Raise Number:=TSpec.ERR_ID_EXPECTATION_FAILED, Source:=pFailMsg, description:=pFailMsg
+    Err.raise Number:=TErrorDef.ERR_ID_EXPECTATION_FAILED, description:=pFailMsg
 End Sub
 

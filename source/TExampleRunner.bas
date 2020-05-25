@@ -5,10 +5,6 @@ Attribute VB_Name = "TExampleRunner"
 
 Option Explicit
 
-Public Const ERR_ID_SCENARIO_SYNTAX_ERROR = vbError + 6010
-Public Const ERR_ID_STEP_IS_PENDING = vbError + 6020
-Public Const ERR_ID_STEP_IS_MISSING = vbError + 6030
-
 Dim mTestStopped As Boolean
 
 Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As Variant)
@@ -61,7 +57,7 @@ End Sub
 Private Sub print_scenario_title(pExampleTitle As String)
     
     If LCase(Left(pExampleTitle, Len("Scenario:"))) <> "scenario:" And LCase(Left(pExampleTitle, Len("Example:"))) <> "example:" Then
-        Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="can't find scenario start in >" & pExampleTitle & "<"
+        Err.raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="can't find scenario start in >" & pExampleTitle & "<"
     Else
         Debug.Print vbTab & pExampleTitle
     End If
@@ -79,7 +75,7 @@ Private Sub run_step_line(pStepLine As Collection, pobjTestDefinition As Variant
             Debug.Print vbTab & step_result(1)
         End If
     Case Else
-        Err.Raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="unexpected step type " & pStepLine.Item("step_type")
+        Err.raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="unexpected step type " & pStepLine.Item("step_type")
     End Select
 End Sub
 
