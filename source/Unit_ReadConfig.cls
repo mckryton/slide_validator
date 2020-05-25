@@ -12,8 +12,8 @@ Attribute VB_Exposed = False
 '------------------------------------------------------------------------
 Option Explicit
 
-'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = ""
+'separate tags by comma, e.g.: "wip,debug,production"
+Const cTags = "wip"
 
 Const RULE_CFG_SLIDE_IDX = 2
 
@@ -61,8 +61,8 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
         Case "Given a SlideValidator Setup with a config slide for the rule FontWhiteList"
-            Set mSlideValidatorConfig = create_slide_validator_config
-            Set mConfigSlide = create_config_slide(mSlideValidatorConfig, "FontWhiteList")
+            Set mSlideValidatorConfig = TSupport.create_slide_validator_pres
+            Set mConfigSlide = TSupport.create_config_slide(mSlideValidatorConfig, "FontWhiteList")
            
         Case "Given the config slide contains the parameter AllowedFonts with the value Arial"
             Set config_table = create_config_table(mConfigSlide)
@@ -124,30 +124,6 @@ End Property
 Public Property Let Log(ByVal pLogger As Logger)
     Set mLogger = pLogger
 End Property
-
-Private Function create_slide_validator_config() As Presentation
-
-    Dim config_presentation As Presentation
-    Dim slide_validator As Presentation
-    Dim master_slide As CustomLayout
-        
-    On Error GoTo error_handler
-    Set slide_validator = Application.Presentations("SlideValidator.pptm")
-    Set config_presentation = Application.Presentations.Add
-    
-    Set master_slide = slide_validator.SlideMaster.CustomLayouts(RULE_CFG_SLIDE_IDX)
-    If master_slide.Name <> "rule_config" Then
-        Err.raise ERR_ID_MISSING_CFG_MASTER_SLIDE, description = "could not find rule_config at idx " & RULE_CFG_SLIDE_IDX & " found >" & master_slide.Name & "< instead"
-    End If
-    master_slide.Copy
-    config_presentation.SlideMaster.CustomLayouts.Paste RULE_CFG_SLIDE_IDX
-    
-    Set create_slide_validator_config = config_presentation
-    Exit Function
-    
-error_handler:
-    Log.log_function_error "clsFeatureFontWhiteList.create_slide_validator_config"
-End Function
 
 Private Function create_config_table(pConfigSlide As Slide) As Table
     

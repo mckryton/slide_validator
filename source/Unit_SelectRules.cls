@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = "wip"
+Const cTags = ""
 
 Dim mLogger As Logger
 Dim mTestPresentation As Presentation
@@ -34,11 +34,11 @@ Public Sub test_examples()
 
     On Error GoTo error_handler
     examples = Array( _
-                    Array("Rule: A slide is a configuration slide if it's layout is named Rule_Config"), _
+                    Array("Rule: A slide is a configuration slide if it's layout is named rule_config"), _
                     Array("Example: valid configuration slide", _
                            "Given a config slide using the master slide template for rule config", _
                            "When the slide is validated to be a configuration", _
-                           "Then the validation result confirms the configuration" _
+                           "Then the slide is recognized as a configuration" _
                     ), _
                     Array("Rule: Ignore hidden config slides"), _
                     Array("Rule: Choose Rule from config slide title"), _
@@ -68,7 +68,8 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
         
         Case "Given a config slide using the master slide template for rule config"
-            Set mTestPresentation = ActivePresentation
+            Set mTestPresentation = TSupport.create_slide_validator_pres
+            Set mTestConfigSlide = TSupport.create_config_slide(mTestPresentation)
             
         Case "When the slide is validated to be a configuration"
             mIsConfigSlide = Validator.is_config_slide(mTestConfigSlide)
