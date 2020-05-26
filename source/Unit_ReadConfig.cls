@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "wip,debug,production"
-Const cTags = "wip"
+Const cTags = ""
 
 Const RULE_CFG_SLIDE_IDX = 2
 

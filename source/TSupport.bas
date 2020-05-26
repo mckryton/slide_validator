@@ -55,3 +55,13 @@ Private Function get_config_template_index(pConfigPresentation As Presentation) 
                 Validator.CONFIG_TEMPLATE_NAME & "< in presentation " & pConfigPresentation.Name
 End Function
 
+Public Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
+
+    Dim slide_with_textbox As Slide
+    Dim textbox As shape
+
+    Set slide_with_textbox = pprePresentation.Slides.AddSlide(1, pprePresentation.SlideMaster.CustomLayouts(7))
+    Set textbox = slide_with_textbox.Shapes.AddTextbox(msoTextOrientationHorizontal, 200, 200, 400, 200)
+    textbox.TextFrame.TextRange.font.Name = pstrFontName
+    textbox.TextFrame.TextRange.Text = "This text is using " & pstrFontName & " as font."
+End Sub

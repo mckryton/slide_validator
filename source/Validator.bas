@@ -7,6 +7,7 @@ Option Explicit
 Public Const CONFIG_TEMPLATE_NAME = "rule_config"
 
 Public Const ERR_ID_MISSING_CFG_MASTER_SLIDE = vbError + 7000
+Public Const ERR_ID_UNKNOWN_RULE_NAME = vbError + 7050
 
 Const COMMENT_AUTHOR = "Slide Validator"
 Const COMMENT_INITIALS = "bot"
@@ -194,4 +195,52 @@ Public Function is_config_slide(pConfigSlide As Slide) As Boolean
     Else
         is_config_slide = False
     End If
+End Function
+
+Public Function get_rule(pRuleName As String) As Variant
+
+    Dim rule_catalog As RuleCatalog
+    
+    Set rule_catalog = New RuleCatalog
+    On Error GoTo error_handler
+    Set get_rule = CallByName(rule_catalog, pRuleName, VbGet)
+    Set rule_catalog = Nothing
+    Exit Function
+    
+error_handler:
+    Err.raise ERR_ID_UNKNOWN_RULE_NAME, description:="can't find a rule class named >" & pRuleName & "<"
+End Function
+
+Public Function setup_rules(Optional pConfigPres) As ValidationSetup
+    
+    Dim slide_validator As Presentation
+    Dim validation_setup As ValidationSetup
+    Dim config_slide As Slide
+    Dim rule_name As String
+    Dim validation_rule As Variant
+    
+    If IsMissing(pConfigPres) Then
+        Set slide_validator = Application.Presentations("SlideValidator.pptm")
+    Else
+        Set slide_validator = pConfigPres
+    End If
+    Set validation_setup = New ValidationSetup
+    For Each config_slide In slide_validator.Slides
+        If config_slide.Master.Name = CONFIG_TEMPLATE_NAME Then
+            rule_name = Trim(config_slide.Shapes.Title.TextFrame.TextRange.Text)
+            On Error GoTo missing_rule
+            Set validation_rule = get_rule(rule_name)
+            On Error GoTo 0
+            If TypeName(validation_rule) <> "Nothing" Then
+                validation_setup.ActiveRules.Add validation_rule, rule_name
+            End If
+        End If
+    Next
+    Set setup_rules = validation_setup
+    Exit Function
+    
+missing_rule:
+    validation_setup.SetupErrors.Add "couldn't find a rule for config >" & rule_name & "<"
+    Set validation_rule = Nothing
+    Resume Next
 End Function

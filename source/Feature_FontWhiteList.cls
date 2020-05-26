@@ -16,7 +16,7 @@ Option Explicit
 Const cTags = "wip"
 
 Dim mLogger As Logger
-Dim mobjRuleFontWhiteList As Rule_FontWhiteList
+Dim mobjRuleFontWhiteList As rule_fontwhitelist
 Dim mpreTestPresentation As Presentation
 
 Public Property Get description() As String
@@ -57,7 +57,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
         Case "Given a font white list rule listing Arial"
-            Set mobjRuleFontWhiteList = New Rule_FontWhiteList
+            Set mobjRuleFontWhiteList = New rule_fontwhitelist
             Set rule_config = New Collection
             rule_config.Add "Arial", "AllowedFonts"
             mobjRuleFontWhiteList.Config = rule_config
@@ -66,10 +66,10 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             Set mpreTestPresentation = Application.Presentations.Add
             
         Case "Given it contains a slide with a textbox using Arial"
-            add_slide_with_textbox mpreTestPresentation, "Arial"
+            TSupport.add_slide_with_textbox mpreTestPresentation, "Arial"
             
         Case "Given it contains a slide with a textbox using Times New Roman"
-            add_slide_with_textbox mpreTestPresentation, "Times New Roman"
+            TSupport.add_slide_with_textbox mpreTestPresentation, "Times New Roman"
             
         Case "When the rule is applied to the presentation"
             Validator.validate_slides mpreTestPresentation, Array(mobjRuleFontWhiteList)
@@ -125,22 +125,6 @@ End Property
 Public Property Let Log(ByVal pLogger As Logger)
     Set mLogger = pLogger
 End Property
-
-Private Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
-
-    Dim slide_with_textbox As Slide
-    Dim textbox As shape
-    
-    On Error GoTo error_handler
-    Set slide_with_textbox = pprePresentation.Slides.AddSlide(1, pprePresentation.SlideMaster.CustomLayouts(7))
-    Set textbox = slide_with_textbox.Shapes.AddTextbox(msoTextOrientationHorizontal, 200, 200, 400, 200)
-    textbox.TextFrame.TextRange.font.Name = pstrFontName
-    textbox.TextFrame.TextRange.Text = "This text is using " & pstrFontName & " as font."
-    Exit Sub
-    
-error_handler:
-    Log.log_function_error "clsFeatureFontWhiteList.add_slide_with_textbox"
-End Sub
 
 Private Sub Class_Terminate()
     Set mLogger = Nothing

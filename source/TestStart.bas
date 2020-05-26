@@ -32,7 +32,7 @@ Public Sub run_unit_tests(Optional pTags)
 
     On Error GoTo error_handler
     Set Log = New Logger
-    unit_testcases = Array(New Unit_ReadConfig, New Unit_ChooseTargetPresentation, New Unit_SelectRules)
+    unit_testcases = Array(New Unit_ReadConfig, New Unit_ChooseTargetPresentation, New Unit_SetupRules)
     Set case_runner = New TCaseRunner
     case_runner.run_testcases unit_testcases, pTags
     Exit Sub
