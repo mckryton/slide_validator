@@ -34,15 +34,15 @@ Public Sub Log(pLogMsg As String, Optional pMsgLogLevel)
     If msg_log_level <= Me.LogLevel Then
         log_msg = Time
         Select Case msg_log_level
-            Case cLogDebug
+            Case Me.LVL_DEBUG
                 log_msg = log_msg & " debug:"
-            Case cLogInfo
+            Case Me.LVL_INFO
                 log_msg = log_msg & " info:"
-            Case cLogWarning
+            Case Me.LVL_WARNING
                 log_msg = log_msg & " warning:"
-            Case cLogError
+            Case Me.LVL_ERROR
                 log_msg = log_msg & " error:"
-            Case cLogCritical
+            Case Me.LVL_CRITICAL
                 log_msg = log_msg & " critical:"
             Case Else
                 log_msg = log_msg & " custom(" & msg_log_level & "):"

@@ -5,6 +5,7 @@ Attribute VB_Name = "TExampleRunner"
 
 Option Explicit
 
+Dim mLogger As Logger
 Dim mTestStopped As Boolean
 
 Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As Variant)
@@ -42,9 +43,9 @@ Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As V
     
 error_handler:
     If Err.Number = ERR_ID_SCENARIO_SYNTAX_ERROR Then
-        SystemLogger.log_error "syntax error: " & Err.description & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
+        Log.error_log "syntax error: " & Err.description & vbCr & vbLf & "in line >" & colLine.Item("line") & "<"
     Else
-        SystemLogger.log_error "TExampleRunner.runExample", Join(pExampleLinesArray, vbTab & vbCr & vbLf)
+        Log.log_function_error "TExampleRunner.runExample", Join(pExampleLinesArray, vbTab & vbCr & vbLf)
     End If
 End Sub
 
@@ -103,7 +104,7 @@ Public Function getExampleLine(pvarExample As Variant, pintLineIndex As Integer)
     Exit Function
 
 error_handler:
-    SystemLogger.log_error "TExampleRunner.getExampleLine"
+    Log.log_function_error "TExampleRunner.getExampleLine"
 End Function
 
 Public Property Get TestStopped() As Boolean
@@ -123,4 +124,12 @@ Public Sub pending(pPendingMsg)
     Debug.Print "PENDING: " & pPendingMsg
     stop_test
 End Sub
+
+Public Property Get Log() As Logger
+    
+    If TypeName(mLogger) = "Nothing" Then
+        Set mLogger = New Logger
+    End If
+    Set Log = mLogger
+End Property
 

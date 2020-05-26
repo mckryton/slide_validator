@@ -34,7 +34,7 @@ Public Sub run_testcases(pTestCases As Variant, Optional pTags)
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "TCaseRunner.run_testcases"
+    Log.log_function_error "TCaseRunner.run_testcases"
 End Sub
 
 Private Function test_has_tag(pTags As Variant, pTestCase As Variant)
@@ -57,7 +57,7 @@ Private Function test_has_tag(pTags As Variant, pTestCase As Variant)
     Exit Function
 
 error_handler:
-    SystemLogger.log_error "TCaseRunner.run_testcases"
+    Log.log_function_error "TCaseRunner.run_testcases"
 End Function
 
 Public Property Get Log() As Logger

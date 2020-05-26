@@ -15,7 +15,6 @@ Option Explicit
 'separate tags by comma, e.g.: "@debug,@production"
 Const cTags = "wip"
 
-Dim mLogger As Logger
 Dim mTestPresentation As Presentation
 Dim mTestSlideValidator As Presentation
 Dim mTestConfigSlide As Slide
@@ -25,7 +24,7 @@ Dim mValidationSetup As ValidationSetup
 Public Property Get description() As String
 
     description = "Slide Validator will find configuration for rule from it's own slides" & vbLf & _
-                    vbTab & "and apply configuration found to matching rules"
+                    vbTab & "and find matching rule classes using the configuration title"
 End Property
 
 Public Sub test_examples()
@@ -33,7 +32,6 @@ Public Sub test_examples()
     Dim examples As Variant
     Dim example As Variant
 
-    On Error GoTo error_handler
     examples = Array( _
                     Array("Rule: A slide is a configuration slide if it's layout is named rule_config"), _
                     Array("Example: valid configuration slide", _
@@ -54,10 +52,6 @@ Public Sub test_examples()
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next
-    Exit Sub
-
-error_handler:
-    SystemLogger.log_error "Unit_ReadConfig.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant
@@ -138,20 +132,4 @@ End Property
 
 Private Sub pending(pPendingMsg)
     Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
-End Sub
-
-Private Property Get Log() As Logger
-    
-    If TypeName(mLogger) = "Nothing" Then
-        Set mLogger = New Logger
-    End If
-    Set Log = mLogger
-End Property
-
-Public Property Let Log(ByVal pLogger As Logger)
-    Set mLogger = pLogger
-End Property
-
-Private Sub Class_Terminate()
-    Set mLogger = Nothing
 End Sub

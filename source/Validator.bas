@@ -12,6 +12,8 @@ Public Const ERR_ID_UNKNOWN_RULE_NAME = vbError + 7050
 Const COMMENT_AUTHOR = "Slide Validator"
 Const COMMENT_INITIALS = "bot"
 
+Dim mLogger As Logger
+
 Public Sub validate_slides(Optional pTargetPresentation, Optional pvarRules)
 
     Dim sldCurrent As Slide
@@ -33,16 +35,16 @@ Public Sub validate_slides(Optional pTargetPresentation, Optional pvarRules)
     For Each sldCurrent In pTargetPresentation.Slides
         'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
-            SystemLogger.Log "apply rules to slide " & sldCurrent.SlideIndex
+            Log.info_log "apply rules to slide " & sldCurrent.SlideIndex
             apply_rules pvarRules, sldCurrent
         Else
-            SystemLogger.Log "skip hidden slide " & sldCurrent.SlideIndex
+            Log.info_log "skip hidden slide " & sldCurrent.SlideIndex
         End If
     Next
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Validator.runRuleCheck"
+    Log.log_function_error "Validator.runRuleCheck"
 End Sub
 
 Private Function apply_rules(pvarRules As Variant, psldCurrentSlide As Slide)
@@ -60,7 +62,7 @@ Private Function apply_rules(pvarRules As Variant, psldCurrentSlide As Slide)
     Exit Function
     
 error_handler:
-    SystemLogger.log_error "Validator.apply_rule"
+    Log.log_function_error "Validator.apply_rule"
 End Function
 
 Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As String)
@@ -74,7 +76,7 @@ Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As St
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Validator.add_violation"
+    Log.log_function_error "Validator.add_violation"
 End Sub
 
 Private Sub cleanup_violation_comments()
@@ -84,7 +86,7 @@ Private Sub cleanup_violation_comments()
     Dim colOldMessages As Collection      'comment objects for old violation messages
     
     On Error GoTo error_handler
-    SystemLogger.Log "delete old violation messages"
+    Log.info_log "delete old violation messages"
     For Each sldCurrent In ActivePresentation.Slides
         'ignore hidden slides
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
@@ -104,7 +106,7 @@ Private Sub cleanup_violation_comments()
     Exit Sub
 
 error_handler:
-    SystemLogger.log_error "Validator.cleanup_violation_messages"
+    Log.log_function_error "Validator.cleanup_violation_messages"
 End Sub
 
 Public Function read_config(pConfigSlide As Slide) As Collection
@@ -244,3 +246,11 @@ missing_rule:
     Set validation_rule = Nothing
     Resume Next
 End Function
+
+Public Property Get Log() As Logger
+    
+    If TypeName(mLogger) = "Nothing" Then
+        Set mLogger = New Logger
+    End If
+    Set Log = mLogger
+End Property
