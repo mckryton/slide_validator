@@ -2,11 +2,10 @@ Attribute VB_Name = "ExtraVBA"
 Option Explicit
 
 Public Function existsItem(pvarKey As Variant, pcolACollection As Collection) As Boolean
-                    
-    Dim varItemValue As Variant
                      
     On Error GoTo NOT_FOUND
-    varItemValue = pcolACollection.Item(pvarKey)
+    'use typename to access the collections item independ of its type (object or basic type)
+    TypeName pcolACollection.Item(pvarKey)
     On Error GoTo 0
     existsItem = True
     Exit Function
@@ -48,7 +47,7 @@ Private Sub exportCode()
                 strSuffix = "txt"
         End Select
         vcomSource.Export strPath & strSeparator & vcomSource.Name & "." & strSuffix
-        export_logger.log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
+        export_logger.Log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
     Next
     Exit Sub
 
