@@ -10,7 +10,9 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "wip,debug,production"
-Const cTags = ""
+Const cTags = "wip"
+
+Dim mTestPresentation As Presentation
 
 Public Property Get description() As String
 
@@ -24,11 +26,17 @@ Public Sub test_examples()
     Dim example As Variant
 
     examples = Array( _
-                    Array("Rule: add comments to the target slidefor every rule violation"), _
+                    Array("Rule: add comments to the target slide for every rule violation"), _
+                    Array("Example: slide with violations", _
+                            "Given a presentation with one slide", _
+                            "And a rule which fails to validate the slide", _
+                            "When the presentation is validazed", _
+                            "Then a comment about the violation will be added to the slide" _
+                          ), _
                     Array("Rule: remove comments from earlier violation"), _
                     Array("Rule: create a validation summary after validation was finished"), _
-                    Array("Example: validation with violations"), _
-                    Array("Example: validation without violations"), _
+                    Array("Example: summary report with violations"), _
+                    Array("Example: summary report without violations"), _
                     Array("Example: empty target presentation"), _
                     Array("Rule: setup errors will shown in the validation summary"), _
                     Array("Example: no setup errors"), _
@@ -44,13 +52,12 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
-        Case "Given a precondition"
-           
-        Case "Given another precondition"
-            
-        Case "When any action happens"
-
-        Case "Then some result is expected"
+        Case "Given a presentation with one slide"
+            Set mTestPresentation = Application.Presentations.Add
+            mTestPresentation.Slides.AddSlide 1, mTestPresentation.SlideMaster.CustomLayouts(6)
+        
+        Case "Given a rule which fails to validate the slide"
+            pending "have to create a rule for testing purposes"
         
         Case Else
             Err.raise ERR_ID_STEP_IS_MISSING
@@ -67,7 +74,7 @@ Private Function raise_step_error(pErrId As Long) As Variant
     TExampleRunner.stop_test
     Select Case Err.Number
     Case ERR_ID_STEP_IS_PENDING
-        raise_step_error = Array("PENDING")
+        raise_step_error = Array("PENDING", Err.description)
     Case ERR_ID_STEP_IS_MISSING
         raise_step_error = Array("MISSING")
     Case Else
@@ -84,7 +91,7 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pPendingMsg)
-    Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+    Err.raise ERR_ID_STEP_IS_PENDING, description:=pPendingMsg
 End Sub
 
 
