@@ -52,5 +52,5 @@ Private Sub exportCode()
     Exit Sub
 
 error_handler:
-    export_logger.log_function_error "System.exportCode"
+    export_logger.log_function_error "ExtraVBA.exportCode"
 End Sub

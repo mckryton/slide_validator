@@ -24,7 +24,7 @@ Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As V
     End If
     print_scenario_title colLine.Item("line")
     intLineIndex = intLineIndex + 1
-    Do
+    Do While TExampleRunner.TestStopped = False And intLineIndex <= UBound(pExampleLinesArray)
         Set colLine = getExampleLine(pExampleLinesArray, intLineIndex)
         If colLine.Item("line_head") <> "And" Then
             strLastStepType = colLine.Item("line_head")
@@ -33,7 +33,7 @@ Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As V
         colLine.Add strLastStepType, "step_type"
         run_step_line colLine, pTestDefinitionObject
         intLineIndex = intLineIndex + 1
-    Loop Until TExampleRunner.TestStopped = True Or intLineIndex > UBound(pExampleLinesArray)
+    Loop
     If Not TExampleRunner.TestStopped Then
         pTestDefinitionObject.after
     End If
@@ -72,8 +72,8 @@ Private Sub run_step_line(pStepLine As Collection, pobjTestDefinition As Variant
     Case "Given", "When", "Then"
         step_result = pobjTestDefinition.run_step(pStepLine)
         Debug.Print vbTab & step_result(0), vbTab & pStepLine.Item("line")
-        If step_result(0) = "FAILED" Then
-            Debug.Print vbTab & step_result(1)
+        If step_result(0) = "FAILED" Or step_result(0) = "PENDING" Then
+            Debug.Print "", step_result(1)
         End If
     Case Else
         Err.raise ERR_ID_SCENARIO_SYNTAX_ERROR, description:="unexpected step type " & pStepLine.Item("step_type")
