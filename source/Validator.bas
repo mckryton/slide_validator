@@ -14,55 +14,82 @@ Const COMMENT_INITIALS = "bot"
 
 Dim mLogger As Logger
 
-Public Sub validate_slides(Optional pTargetPresentation, Optional pvarRules)
+Public Sub validate_presentation(Optional pTargetPresentation, Optional pValidationSetup)
 
     Dim sldCurrent As Slide
+    Dim target_presentation As Presentation
+    Dim validation_setup As ValidationSetup
+    Dim validation_log As ValidationLog
+    Dim violations As Collection
 
     On Error GoTo error_handler
-    If IsMissing(pTargetPresentation) Then
-        Set pTargetPresentation = Validator.ValidationTarget
-        If TypeName(pTargetPresentation) = "Nothing" Then
-            MsgBox "Couldn't find any open presentation to apply validation rules.", vbExclamation + vbOKOnly, "No presentation for validation available"
+    If Not ActivePresentation.SlideShowWindow Is Nothing Then
+        Log.info_log "exit presentation mode"
+        ActivePresentation.SlideShowWindow.View.Exit
+    End If
+    'if the macro is called from presentation mode, it will call the function with the clicked shape object as parameter
+    If IsMissing(pTargetPresentation) Or TypeName(pTargetPresentation) = "Shape" Then
+        Set target_presentation = Validator.ValidationTarget
+        If TypeName(target_presentation) = "Nothing" Then
+            MsgBox "Couldn't find any open presentation to apply validation rules.", vbExclamation + vbOKOnly, "No presentation for validation is available"
             End
         End If
+    Else
+        Set target_presentation = pTargetPresentation
     End If
-    If IsMissing(pvarRules) Then
-        'TODO: add function to setup all rules
-        pvarRules = Array()
+    Log.info_log "start validation of >" & target_presentation.Name & "<"
+    target_presentation.Windows(1).Activate
+    If IsMissing(pValidationSetup) Then
+        Set validation_setup = setup_rules(Application.Presentations("SlideValidator.pptm"))
+    Else
+        Set validation_setup = pValidationSetup
     End If
+    Set validation_log = New ValidationLog
     'remove comments from earlier validations because they may not reflect the current content
     Validator.cleanup_violation_comments
-    For Each sldCurrent In pTargetPresentation.Slides
+    For Each sldCurrent In target_presentation.Slides
         'hidden slides contain most often discarded content and can be ignored
         If sldCurrent.SlideShowTransition.Hidden = msoFalse Then
             Log.info_log "apply rules to slide " & sldCurrent.SlideIndex
-            apply_rules pvarRules, sldCurrent
+            Set violations = apply_rules_on_slide(validation_setup.ActiveRules, sldCurrent)
+            If Not violations Is Nothing Then
+                validation_log.violations.Add violations
+            End If
         Else
             Log.info_log "skip hidden slide " & sldCurrent.SlideIndex
         End If
     Next
+    MsgBox "Validation is complete. Found violations on " & validation_log.violations.Count & " slide(s).", vbOKOnly, "SlideValidator finished validation"
     Exit Sub
 
 error_handler:
-    Log.log_function_error "Validator.runRuleCheck"
+    Log.log_function_error "Validator.validate_presentation"
 End Sub
 
-Private Function apply_rules(pvarRules As Variant, psldCurrentSlide As Slide)
+Private Function apply_rules_on_slide(pvarRules As Collection, psldCurrentSlide As Slide) As Collection
 
-    Dim varRule As Variant
-    Dim strValidationResult As String
+    Dim rule As Variant
+    Dim validation_result As String
+    Dim violations As Collection
     
     On Error GoTo error_handler
-    For Each varRule In pvarRules
-        strValidationResult = varRule.apply_rule(psldCurrentSlide)
-        If Len(Trim(strValidationResult)) > 0 Then
-           add_violation psldCurrentSlide, strValidationResult
+    Set violations = New Collection
+    For Each rule In pvarRules
+        validation_result = rule.apply_rule(psldCurrentSlide)
+        If Len(Trim(validation_result)) > 0 Then
+           add_violation psldCurrentSlide, validation_result
+           violations.Add validation_result
         End If
     Next
+    If violations.Count = 0 Then
+        Set apply_rules_on_slide = Nothing
+    Else
+        Set apply_rules_on_slide = violations
+    End If
     Exit Function
     
 error_handler:
-    Log.log_function_error "Validator.apply_rule"
+    Log.log_function_error "Validator.apply_rules_on_slide"
 End Function
 
 Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As String)
@@ -109,16 +136,16 @@ error_handler:
     Log.log_function_error "Validator.cleanup_violation_messages"
 End Sub
 
-Public Function read_config(pConfigSlide As Slide) As Collection
+Public Function get_rule_config(pConfigSlide As Slide) As Collection
     
     Dim config_table As Table
     
     Set config_table = get_config_table(pConfigSlide)
     If TypeName(config_table) <> "Nothing" Then
-        Set read_config = read_config_from_table(config_table)
+        Set get_rule_config = read_config_from_table(config_table)
     Else
         'return an empty collection to be able to count available settings in any case
-        Set read_config = New Collection
+        Set get_rule_config = New Collection
     End If
 End Function
 
@@ -158,11 +185,11 @@ Public Function get_validation_target_form() As SelectValidationTarget
     Dim select_target_form As SelectValidationTarget
     
     Set select_target_form = New SelectValidationTarget
-    select_target_form.PresentationsInfo = get_target_presentations_info_info()
+    select_target_form.PresentationsInfo = get_target_presentations_info()
     Set get_validation_target_form = select_target_form
 End Function
 
-Public Function get_target_presentations_info_info() As Collection
+Public Function get_target_presentations_info() As Collection
     
     Dim target_presentation_names As Collection
     Dim open_presentation As Presentation
@@ -173,7 +200,7 @@ Public Function get_target_presentations_info_info() As Collection
             target_presentation_names.Add Array(open_presentation.Name, open_presentation.Path), open_presentation.Name
         End If
     Next
-    Set get_target_presentations_info_info = target_presentation_names
+    Set get_target_presentations_info = target_presentation_names
 End Function
 
 Public Property Get ValidationTarget() As Presentation
@@ -232,6 +259,7 @@ Public Function setup_rules(Optional pConfigPres) As ValidationSetup
             rule_name = Trim(config_slide.Shapes.Title.TextFrame.TextRange.Text)
             On Error GoTo missing_rule
             Set validation_rule = get_rule(rule_name)
+            validation_rule.Config = get_rule_config(config_slide)
             On Error GoTo 0
             If TypeName(validation_rule) <> "Nothing" Then
                 validation_setup.ActiveRules.Add validation_rule, rule_name

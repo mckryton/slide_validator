@@ -69,7 +69,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
             
         Case "When the configuration for the Feature_FontWhiteList is read"
-            Set mRuleConfig = Validator.read_config(mConfigSlide)
+            Set mRuleConfig = Validator.get_rule_config(mConfigSlide)
             TSpec.expect(TypeName(mRuleConfig)).to_be "Collection"
             
         Case "Then the value for the parameter AllowedFonts is set to Arial"

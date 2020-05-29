@@ -53,6 +53,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     
     Dim step_result As String
     Dim rule_config As Collection
+    Dim validation_setup As ValidationSetup
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
@@ -72,7 +73,9 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             TSupport.add_slide_with_textbox mpreTestPresentation, "Times New Roman"
             
         Case "When the rule is applied to the presentation"
-            Validator.validate_slides mpreTestPresentation, Array(mobjRuleFontWhiteList)
+            Set validation_setup = New ValidationSetup
+            validation_setup.ActiveRules.Add mobjRuleFontWhiteList, "FontWhiteList"
+            Validator.validate_presentation mpreTestPresentation, validation_setup
             
         Case "Then a comment about the rule validation is added to the second slide"
             TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 1
@@ -100,6 +103,11 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
+
+Public Sub before()
+    
+    Validator.Log.LogLevel = Validator.Log.LVL_WARNING
+End Sub
 
 Public Sub after()
     mpreTestPresentation.Saved = msoTrue

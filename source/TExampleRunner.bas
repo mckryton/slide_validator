@@ -22,6 +22,7 @@ Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As V
         print_rule colLine.Item("line")
         Exit Sub
     End If
+    pTestDefinitionObject.before
     print_scenario_title colLine.Item("line")
     intLineIndex = intLineIndex + 1
     Do While TExampleRunner.TestStopped = False And intLineIndex <= UBound(pExampleLinesArray)

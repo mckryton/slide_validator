@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "@debug,@production"
-Const cTags = "wip"
+Const cTags = ""
 
 Dim mTestPresentation As Presentation
 Dim mTestSlideValidator As Presentation
