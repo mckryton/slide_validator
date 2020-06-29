@@ -9,7 +9,7 @@ Public Sub run_acceptance_tests(Optional pTags)
 
     On Error GoTo error_handler
     Set Log = New Logger
-    acceptance_testcases = Array(New Feature_Rule_FontWhiteList, New Feature_ApplyRules, New Feature_ShowSummaryReport)
+    acceptance_testcases = Array(New Feature_Rule_Permitted_Fonts)
     Set case_runner = New TCaseRunner
     case_runner.run_testcases acceptance_testcases, pTags
     Exit Sub

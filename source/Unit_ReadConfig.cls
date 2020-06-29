@@ -13,7 +13,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "wip,debug,production"
-Const cTags = ""
+Const cTags = "wip"
 
 Const RULE_CFG_SLIDE_IDX = 2
 
@@ -38,10 +38,10 @@ Public Sub test_examples()
     scenarios = Array( _
                     Array("Rule: convert the the content of the first two columns of the the config table into key value pairs"), _
                     Array("Example: config with one parameter", _
-                           "Given a SlideValidator Setup with a config slide for the rule FontWhiteList", _
-                           "And the config slide contains the parameter AllowedFonts with the value Arial", _
+                           "Given a SlideValidator Setup with a config slide for the rule ""Permitted Fonts""", _
+                           "And the config slide contains the parameter PermittedFonts with the value Arial", _
                            "When the configuration for the Feature_FontWhiteList is read", _
-                           "Then the value for the parameter AllowedFonts is set to Arial" _
+                           "Then the value for the parameter PermittedFonts is set to Arial" _
                     ) _
                 )
     For Each scenario In scenarios
@@ -60,20 +60,20 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
     
-        Case "Given a SlideValidator Setup with a config slide for the rule FontWhiteList"
+        Case "Given a SlideValidator Setup with a config slide for the rule ""Permitted Fonts"""
             Set mSlideValidatorConfig = TSupport.create_slide_validator_pres
-            Set mConfigSlide = TSupport.create_config_slide(mSlideValidatorConfig, "FontWhiteList")
+            Set mConfigSlide = TSupport.create_config_slide(mSlideValidatorConfig, "Permitted Fonts")
            
-        Case "Given the config slide contains the parameter AllowedFonts with the value Arial"
-            Set config_table = create_config_table(mConfigSlide)
-            add_config_parameter config_table, Array("AllowedFonts", "Arial", "parameter for test case Unit_ReadConfig")
+        Case "Given the config slide contains the parameter PermittedFonts with the value Arial"
+            Set config_table = TSupport.get_config_table(mConfigSlide)
+            TSupport.add_config_parameter config_table, Array("PermittedFonts", "Arial", "parameter for test case Unit_ReadConfig")
             
         Case "When the configuration for the Feature_FontWhiteList is read"
             Set mRuleConfig = Validator.get_rule_config(mConfigSlide)
             TSpec.expect(TypeName(mRuleConfig)).to_be "Collection"
             
-        Case "Then the value for the parameter AllowedFonts is set to Arial"
-            TSpec.expect(mRuleConfig("AllowedFonts")).to_be "Arial"
+        Case "Then the value for the parameter PermittedFonts is set to Arial"
+            TSpec.expect(mRuleConfig("PermittedFonts")).to_be "Arial"
         
         Case Else
             Err.raise ERR_ID_STEP_IS_MISSING
@@ -97,6 +97,11 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
+
+Public Sub before()
+    
+    Validator.Log.LogLevel = Validator.Log.LVL_WARNING
+End Sub
 
 Public Sub after()
     If TypeName(mSlideValidatorConfig) <> "Nothing" Then
@@ -125,26 +130,6 @@ Public Property Let Log(ByVal pLogger As Logger)
     Set mLogger = pLogger
 End Property
 
-Private Function create_config_table(pConfigSlide As Slide) As Table
-    
-    Dim config_table As Table
-    
-    Set config_table = pConfigSlide.Shapes.AddTable(1, 3, ExtraPpt.cm2points(2.33), ExtraPpt.cm2points(4.7), ExtraPpt.cm2points(29.21), ExtraPpt.cm2points(1.42)).Table
-    config_table.Cell(1, 1).shape.TextFrame.TextRange.Text = "Parameter"
-    config_table.Cell(1, 2).shape.TextFrame.TextRange.Text = "Value"
-    config_table.Cell(1, 3).shape.TextFrame.TextRange.Text = "Description"
-    Set create_config_table = config_table
-End Function
-
-Private Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Variant)
-
-    Dim parameter_row As Row
-    
-    Set parameter_row = pConfigTable.Rows.Add
-    parameter_row.Cells(1).shape.TextFrame.TextRange.Text = pConfigParameter(0)
-    parameter_row.Cells(2).shape.TextFrame.TextRange.Text = pConfigParameter(1)
-    parameter_row.Cells(3).shape.TextFrame.TextRange.Text = pConfigParameter(2)
-End Sub
 
 Private Sub Class_Terminate()
     Set mLogger = Nothing

@@ -33,22 +33,24 @@ Public Sub test_examples()
     Dim example As Variant
 
     examples = Array( _
-                    Array("Rule: A slide is a configuration slide if it's layout is named rule_config"), _
-                    Array("Example: valid configuration slide", _
-                           "Given a config slide using the master slide template for rule config", _
-                           "When the slide is validated to be a configuration", _
-                           "Then the slide is recognized as a configuration" _
+                    Array("Rule: a slide is a rule config slide if it has a title starting with Rule* and contains a table with 3 columns Parameter, Value and Description"), _
+                    Array("Example: complete rule config slide", _
+                           "Given a slide with the title ""Rule: just for test"" and a table with 3 columns ""Parameter,Value,Description""", _
+                           "When the slide is tested for being a rule config slide", _
+                           "Then the slide is considered to be a rule config slide" _
                     ), _
-                    Array("Rule: Ignore hidden config slides"), _
-                    Array("Rule: Choose Rule from config slide title"), _
+                    Array("Rule: rules are setup from config slides in SlideValidator, hidden slides are ignored"), _
+                    Array("Rule: the slide title defines which rule object is used for validation"), _
                     Array("Example: config slide has a matching rule", _
-                            "Given a SlideValidator having a config slide titled FontWhiteList", _
-                            "And a matching Rule named Rule_FontWhiteList", _
+                            "Given a SlideValidator having a config slide titled ""Permitted Fonts""", _
+                            "And a matching Rule named ""Rule_Permitted_Fonts""", _
                             "And a target presentation using Times New Roman for a text", _
                             "When the rules for the next validations are set up", _
-                            "Then the setup contains the rule FontWhiteList" _
+                            "Then the setup contains the rule ""Permitted_Fonts""" _
                     ) _
                 )
+
+
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next
@@ -63,23 +65,24 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
         
-        Case "Given a config slide using the master slide template for rule config"
+        Case "Given a slide with the title ""Rule: just for test"" and a table with 3 columns ""Parameter,Value,Description"""
             Set mTestSlideValidator = TSupport.create_slide_validator_pres
-            Set mTestConfigSlide = TSupport.create_config_slide(mTestSlideValidator)
-            
-        Case "When the slide is validated to be a configuration"
+            Set mTestConfigSlide = TSupport.create_config_slide(mTestSlideValidator, "just for test")
+
+        Case "When the slide is tested for being a rule config slide"
             mIsConfigSlide = Validator.is_config_slide(mTestConfigSlide)
             
-        Case "Then the slide is recognized as a configuration"
+        Case "Then the slide is considered to be a rule config slide"
             TSpec.expect(mIsConfigSlide).to_be True
         
-        Case "Given a SlideValidator having a config slide titled FontWhiteList"
+        Case "Given a SlideValidator having a config slide titled ""Permitted Fonts"""
             Set mTestSlideValidator = TSupport.create_slide_validator_pres
-            Set mTestConfigSlide = TSupport.create_config_slide(mTestSlideValidator, "FontWhiteList")
+            Set mTestConfigSlide = TSupport.create_config_slide(mTestSlideValidator, "Permitted Fonts")
         
-        Case "Given a matching Rule named Rule_FontWhiteList"
-            Set sample_rule = Validator.get_rule("FontWhiteList")
-            TSpec.expect(TypeName(sample_rule)).to_be "Rule_FontWhiteList"
+        Case "Given a matching Rule named ""Rule_Permitted_Fonts"""
+            'the rule object is created just to check it is available
+            Set sample_rule = Validator.get_rule("Permitted_Fonts")
+            TSpec.expect(TypeName(sample_rule)).to_be "Rule_Permitted_Fonts"
         
         Case "Given a target presentation using Times New Roman for a text"
             Set mTestPresentation = Application.Presentations.Add(msoFalse)
@@ -88,8 +91,8 @@ Public Function run_step(pcolStepProps As Collection) As Variant
         Case "When the rules for the next validations are set up"
             Set mValidationSetup = Validator.setup_rules(mTestSlideValidator)
             
-        Case "Then the setup contains the rule FontWhiteList"
-            TSpec.expect(ExtraVBA.existsItem("FontWhiteList", mValidationSetup.ActiveRules)).to_be True
+        Case "Then the setup contains the rule ""Permitted_Fonts"""
+            TSpec.expect(ExtraVBA.existsItem("Permitted_Fonts", mValidationSetup.ActiveRules)).to_be True
             
         Case Else
             Err.raise ERR_ID_STEP_IS_MISSING
@@ -113,6 +116,11 @@ Private Function raise_step_error(pErrId As Long) As Variant
         raise_step_error = Array("FAILED", Err.description)
     End Select
 End Function
+
+Public Sub before()
+    
+    Validator.Log.LogLevel = Validator.Log.LVL_WARNING
+End Sub
 
 Public Sub after()
 

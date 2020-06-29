@@ -2,20 +2,20 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Rule_FontWhiteList"
+Attribute VB_Name = "Rule_Permitted_Fonts"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Dim mWhiteList As Collection
-Dim mConfig As Collection
+Dim m_permitted_fonts As Collection
+Dim m_rule_config As Collection
 
 
 Private Sub Class_Terminate()
-    Set mWhiteList = Nothing
-    Set mConfig = Nothing
+    Set m_permitted_fonts = Nothing
+    Set m_rule_config = Nothing
 End Sub
 
 Private Property Get white_list() As Collection
@@ -23,10 +23,10 @@ Private Property Get white_list() As Collection
     Dim fonts As Variant
     Dim font As String
     
-    If TypeName(mWhiteList) = "Nothing" Then
-        Set mWhiteList = create_white_list(Me.Config("AllowedFonts"))
+    If TypeName(m_permitted_fonts) = "Nothing" Then
+        Set m_permitted_fonts = create_white_list(Me.Config("PermittedFonts"))
     End If
-    Set white_list = mWhiteList
+    Set white_list = m_permitted_fonts
 End Property
 
 Public Function apply_rule(psldCurrentSlide As Slide) As String
@@ -62,15 +62,15 @@ End Function
 
 Public Property Get Config() As Collection
 
-    If TypeName(mConfig) = "Nothing" Then
-        Set mConfig = New Collection
-        mConfig.Add "", "AllowedFonts"
+    If TypeName(m_rule_config) = "Nothing" Then
+        Set m_rule_config = New Collection
+        m_rule_config.Add "", "PermittedFonts"
     End If
-    Set Config = mConfig
+    Set Config = m_rule_config
 End Property
 
 Public Property Let Config(ByVal pConfig As Collection)
-    Set mConfig = pConfig
+    Set m_rule_config = pConfig
     'a new config will reset the white list
-    Set mWhiteList = Nothing
+    Set m_permitted_fonts = Nothing
 End Property

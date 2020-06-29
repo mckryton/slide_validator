@@ -14,7 +14,7 @@ Const COMMENT_INITIALS = "bot"
 
 Dim mLogger As Logger
 
-Public Sub validate_presentation(Optional pTargetPresentation, Optional pValidationSetup)
+Public Sub validate_presentation(Optional pTargetPresentation, Optional pValidationSetup, Optional p_silent)
 
     Dim sldCurrent As Slide
     Dim target_presentation As Presentation
@@ -23,7 +23,7 @@ Public Sub validate_presentation(Optional pTargetPresentation, Optional pValidat
     Dim violations As Collection
 
     On Error GoTo error_handler
-    If Not ActivePresentation.SlideShowWindow Is Nothing Then
+    If Application.SlideShowWindows.Count > 0 Then
         Log.info_log "exit presentation mode"
         ActivePresentation.SlideShowWindow.View.Exit
     End If
@@ -59,7 +59,9 @@ Public Sub validate_presentation(Optional pTargetPresentation, Optional pValidat
             Log.info_log "skip hidden slide " & sldCurrent.SlideIndex
         End If
     Next
-    MsgBox "Validation is complete. Found violations on " & validation_log.violations.Count & " slide(s).", vbOKOnly, "SlideValidator finished validation"
+    If IsMissing(p_silent) Then
+        MsgBox "Validation is complete. Found violations on " & validation_log.violations.Count & " slide(s).", vbOKOnly, "SlideValidator finished validation"
+    End If
     Exit Sub
 
 error_handler:
@@ -219,11 +221,23 @@ End Property
 
 Public Function is_config_slide(pConfigSlide As Slide) As Boolean
 
-    If pConfigSlide.Master.Name = "rule_config" Then
-        is_config_slide = True
-    Else
-        is_config_slide = False
+    Dim slide_shape As shape
+    
+    is_config_slide = False
+    If LCase(Left(Trim(pConfigSlide.Shapes.Title.TextFrame.TextRange.Text), 4)) <> "rule" Then
+        Exit Function
     End If
+    For Each slide_shape In pConfigSlide.Shapes
+        If slide_shape.HasTable Then
+            If slide_shape.Table.Columns.Count >= 3 Then
+                If LCase(Trim(slide_shape.Table.Cell(1, 1).shape.TextFrame.TextRange.Text)) = "parameter" _
+                  And LCase(Trim(slide_shape.Table.Cell(1, 2).shape.TextFrame.TextRange.Text)) = "value" _
+                  And LCase(Trim(slide_shape.Table.Cell(1, 3).shape.TextFrame.TextRange.Text)) = "description" Then
+                    is_config_slide = True
+                End If
+            End If
+        End If
+    Next
 End Function
 
 Public Function get_rule(pRuleName As String) As Variant
@@ -255,8 +269,8 @@ Public Function setup_rules(Optional pConfigPres) As ValidationSetup
     End If
     Set validation_setup = New ValidationSetup
     For Each config_slide In slide_validator.Slides
-        If config_slide.Master.Name = CONFIG_TEMPLATE_NAME Then
-            rule_name = Trim(config_slide.Shapes.Title.TextFrame.TextRange.Text)
+        If is_config_slide(config_slide) Then
+            rule_name = Replace(Trim(Split(config_slide.Shapes.Title.TextFrame.TextRange.Text, ":")(1)), " ", "_")
             On Error GoTo missing_rule
             Set validation_rule = get_rule(rule_name)
             validation_rule.Config = get_rule_config(config_slide)

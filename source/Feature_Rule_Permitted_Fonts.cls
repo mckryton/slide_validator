@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Feature_Rule_FontWhiteList"
+Attribute VB_Name = "Feature_Rule_Permitted_Fonts"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -16,12 +16,12 @@ Option Explicit
 Const cTags = "wip"
 
 Dim mLogger As Logger
-Dim mobjRuleFontWhiteList As rule_fontwhitelist
+Dim mobjRulePermittedFonts As Rule_Permitted_Fonts
 Dim mpreTestPresentation As Presentation
 
 Public Property Get description() As String
 
-    description = "The presentation should only use fonts listed in a white list"
+    description = "The presentation should only use permitted fonts listed in the configuration"
 End Property
 
 Public Sub test_examples()
@@ -29,10 +29,9 @@ Public Sub test_examples()
     Dim examples As Variant
     Dim example As Variant
 
-    On Error GoTo error_handler
     examples = Array( _
                     Array("Example: one slide with valid and one slide with invalid font", _
-                           "Given a font white list rule listing Arial", _
+                           "Given Arial is a permitted font", _
                            "And a new presentation", _
                            "And it contains a slide with a textbox using Arial", _
                            "And it contains a slide with a textbox using Times New Roman", _
@@ -43,10 +42,6 @@ Public Sub test_examples()
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next
-    Exit Sub
-
-error_handler:
-    Log.log_function_error "clsFeatureFontWhiteList.runTest"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant
@@ -57,11 +52,11 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
-        Case "Given a font white list rule listing Arial"
-            Set mobjRuleFontWhiteList = New rule_fontwhitelist
+        Case "Given Arial is a permitted font"
+            Set mobjRulePermittedFonts = New Rule_Permitted_Fonts
             Set rule_config = New Collection
-            rule_config.Add "Arial", "AllowedFonts"
-            mobjRuleFontWhiteList.Config = rule_config
+            rule_config.Add "Arial", "PermittedFonts"
+            mobjRulePermittedFonts.Config = rule_config
             
         Case "Given a new presentation"
             Set mpreTestPresentation = Application.Presentations.Add
@@ -74,8 +69,8 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             
         Case "When the rule is applied to the presentation"
             Set validation_setup = New ValidationSetup
-            validation_setup.ActiveRules.Add mobjRuleFontWhiteList, "FontWhiteList"
-            Validator.validate_presentation mpreTestPresentation, validation_setup
+            validation_setup.ActiveRules.Add mobjRulePermittedFonts, "Permitted_Fonts"
+            Validator.validate_presentation mpreTestPresentation, validation_setup, p_silent:=True
             
         Case "Then a comment about the rule validation is added to the second slide"
             TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 1

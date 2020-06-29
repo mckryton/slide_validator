@@ -9,17 +9,23 @@ Public Function create_config_slide(pConfigPresentation As Presentation, Optiona
     Dim config_slide As Slide
     Dim rule_name As String
     Dim config_template_index As Integer
+    Dim config_table As shape
     
     If IsMissing(pRuleName) Then
-        rule_name = "RuleName"
+        rule_name = "Rule: RuleName"
     Else
-        rule_name = pRuleName
+        rule_name = "Rule: " & pRuleName
     End If
     Set validator_pres = Application.Presentations("SlideValidator.pptm")
     config_template_index = get_config_template_index(pConfigPresentation)
     Set config_slide = pConfigPresentation.Slides.AddSlide(1, pConfigPresentation.SlideMaster.CustomLayouts(config_template_index))
     config_slide.Shapes.Title.TextFrame.TextRange.Text = rule_name
     config_slide.Name = rule_name
+    '.AddTable returns the shape that contains the table not the table itself
+    Set config_table = config_slide.Shapes.AddTable(1, 3, ExtraPpt.cm2points(2.33), ExtraPpt.cm2points(4.7), ExtraPpt.cm2points(29.21), ExtraPpt.cm2points(2.42))
+    config_table.Table.Cell(1, 1).shape.TextFrame.TextRange.Text = "Parameter"
+    config_table.Table.Cell(1, 2).shape.TextFrame.TextRange.Text = "Value"
+    config_table.Table.Cell(1, 3).shape.TextFrame.TextRange.Text = "Description"
     Set create_config_slide = config_slide
 End Function
 
@@ -40,6 +46,38 @@ Public Function create_slide_validator_pres() As Presentation
     
     Set create_slide_validator_pres = config_presentation
 End Function
+
+Public Function get_config_table(pConfigSlide As Slide) As Table
+    
+    Dim config_table As Table
+    Dim slide_shape As shape
+    
+    Set get_config_table = Nothing
+    If LCase(Left(Trim(pConfigSlide.Shapes.Title.TextFrame.TextRange.Text), 4)) <> "rule" Then
+        Exit Function
+    End If
+    For Each slide_shape In pConfigSlide.Shapes
+        If slide_shape.HasTable Then
+            If slide_shape.Table.Columns.Count >= 3 Then
+                If LCase(Trim(slide_shape.Table.Cell(1, 1).shape.TextFrame.TextRange.Text)) = "parameter" _
+                  And LCase(Trim(slide_shape.Table.Cell(1, 2).shape.TextFrame.TextRange.Text)) = "value" _
+                  And LCase(Trim(slide_shape.Table.Cell(1, 3).shape.TextFrame.TextRange.Text)) = "description" Then
+                    Set get_config_table = slide_shape.Table
+                End If
+            End If
+        End If
+    Next
+End Function
+
+Public Sub add_config_parameter(pConfigTable As Table, pConfigParameter As Variant)
+
+    Dim parameter_row As Row
+    
+    Set parameter_row = pConfigTable.Rows.Add
+    parameter_row.Cells(1).shape.TextFrame.TextRange.Text = pConfigParameter(0)
+    parameter_row.Cells(2).shape.TextFrame.TextRange.Text = pConfigParameter(1)
+    parameter_row.Cells(3).shape.TextFrame.TextRange.Text = pConfigParameter(2)
+End Sub
 
 Private Function get_config_template_index(pConfigPresentation As Presentation) As Integer
 
