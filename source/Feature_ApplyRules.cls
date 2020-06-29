@@ -82,6 +82,11 @@ Private Function raise_step_error(pErrId As Long) As Variant
     End Select
 End Function
 
+Public Sub before()
+    
+    Validator.Log.LogLevel = Validator.Log.LVL_WARNING
+End Sub
+
 Public Sub after()
 
 End Sub

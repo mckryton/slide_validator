@@ -83,6 +83,10 @@ Private Function raise_step_error(pErrId As Long) As Variant
     End Select
 End Function
 
+Public Sub before()
+    
+End Sub
+
 Public Sub after()
 
 End Sub
