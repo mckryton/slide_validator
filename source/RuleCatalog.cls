@@ -14,4 +14,4 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' add new public variables to connect config slides with rule objects
-Public Permitted_Fonts As New Rule_Permitted_Fonts
+Public permitted_fonts As New Rule_Permitted_Fonts
