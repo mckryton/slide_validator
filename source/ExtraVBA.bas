@@ -46,7 +46,14 @@ Private Sub exportCode()
             Case Else
                 strSuffix = "txt"
         End Select
-        vcomSource.Export strPath & strSeparator & vcomSource.Name & "." & strSuffix
+        #If Mac Then
+            'try not to change forms unless Microsoft offers full support for forms on the Mac!
+            If Not strSuffix = "frm" Then
+                vcomSource.Export strPath & strSeparator & vcomSource.Name & "." & strSuffix
+            End If
+        #Else
+            vcomSource.Export strPath & strSeparator & vcomSource.Name & "." & strSuffix
+        #End If
         export_logger.Log "export code to " & strPath & strSeparator & vcomSource.Name & "." & strSuffix
     Next
     Exit Sub
