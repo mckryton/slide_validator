@@ -24,27 +24,22 @@ End Property
 
 Public Sub test_examples()
 
-    Dim scenarios As Variant
-    Dim scenario As Variant
+    Dim examples As Collection
+    Dim example As Variant
 
-    On Error GoTo error_handler
-    scenarios = Array( _
-                    Array("Rule: specify a rule to classify the following examples"), _
-                    Array("Example: add a headline to identify this example", _
-                           "Given a precondition", _
-                           "And another precondition", _
-                           "When any action happens", _
-                           "Then some result is expected" _
-                    ) _
-                )
-    For Each scenario In scenarios
-        TExampleRunner.run_example scenario, Me
+    Set examples = New Collection
+    example = Array("Rule: specify a rule to classify the following examples")
+    examples.Add example
+    example = Array("Example: add a headline to identify this example", _
+                        "Given a precondition", _
+                        "And another precondition", _
+                        "When any action happens", _
+                        "Then some result is expected")
+    examples.Add example
+    
+    For Each example In examples
+        TExampleRunner.run_example example, Me
     Next
-    Exit Sub
-
-error_handler:
-    'because reflection in VBA is limited you have to replace the class name manually
-    Log.log_function_error "TTemplate.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant
