@@ -22,41 +22,36 @@ Dim mTargetSelectionForm As SelectValidationTarget
 Public Property Get description() As String
 
     description = "If only one presentation is available for validation, Slide Validator will " & vbLf _
-                    & "validate this automatically. Otherwise a dialog will present as list with names " & vbLf _
-                    & "of possible validation candidates."
+                    & vbTab & "validate this automatically. Otherwise a dialog will present as list with names " & vbLf _
+                    & vbTab & "of possible validation candidates."
 End Property
 
 Public Sub test_examples()
 
-    Dim scenarios As Variant
-    Dim scenario As Variant
+    Dim examples As Collection
+    Dim example As Variant
 
-    On Error GoTo error_handler
-    scenarios = Array( _
-                    Array("Rule: if only one presentation for validation is available, don't ask the user to select a target"), _
-                    Array("Scenario: more than one possible target presentation opened", _
+    Set examples = New Collection
+    examples.Add Array("Rule: if only one presentation for validation is available, don't ask the user to select a target")
+    
+    examples.Add Array("Example: more than one possible target presentation opened", _
                            "Given two presentations opened in addition to Slide Validator", _
                            "When the validator is looking for available validation targets", _
-                           "Then a form will list the two presentations as possible validation targets" _
-                        ), _
-                    Array("Scenario: only one possible target presentation opened", _
+                           "Then a form will list the two presentations as possible validation targets")
+    
+    examples.Add Array("Example: only one possible target presentation opened", _
                            "Given only one presentation opened in addition to Slide Validator", _
                            "When the validator is looking for available validation targets", _
-                           "Then the presentation is set as validation target" _
-                        ), _
-                    Array("Scenario: no possible target presentation opened", _
+                           "Then the presentation is set as validation target")
+    
+    examples.Add Array("Example: no possible target presentation opened", _
                            "Given no presentation is opened in addition to Slide Validator", _
                            "When the validator is looking for available validation targets", _
-                           "Then Slide Validator will return nothing as validation target" _
-                        ) _
-                    )
-    For Each scenario In scenarios
-        TExampleRunner.run_example scenario, Me
+                           "Then Slide Validator will return nothing as validation target")
+    
+    For Each example In examples
+        TExampleRunner.run_example example, Me
     Next
-    Exit Sub
-
-error_handler:
-    Log.log_function_error "Unit_ChooseTarget.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant

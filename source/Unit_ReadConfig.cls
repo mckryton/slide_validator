@@ -31,26 +31,21 @@ End Property
 
 Public Sub test_examples()
 
-    Dim scenarios As Variant
-    Dim scenario As Variant
+    Dim examples As Collection
+    Dim example As Variant
 
-    On Error GoTo error_handler
-    scenarios = Array( _
-                    Array("Rule: convert the the content of the first two columns of the the config table into key value pairs"), _
-                    Array("Example: config with one parameter", _
+    Set examples = New Collection
+    examples.Add Array("Rule: convert the content of the first two columns of the the config table into key value pairs")
+    
+    examples.Add Array("Example: config with one parameter", _
                            "Given a SlideValidator Setup with a config slide for the rule ""Permitted Fonts""", _
                            "And the config slide contains the parameter PermittedFonts with the value Arial", _
                            "When the configuration for the Feature_FontWhiteList is read", _
-                           "Then the value for the parameter PermittedFonts is set to Arial" _
-                    ) _
-                )
-    For Each scenario In scenarios
-        TExampleRunner.run_example scenario, Me
+                           "Then the value for the parameter PermittedFonts is set to Arial")
+    
+    For Each example In examples
+        TExampleRunner.run_example example, Me
     Next
-    Exit Sub
-
-error_handler:
-    Log.log_function_error "Unit_ReadConfig.test_scenarios"
 End Sub
 
 Public Function run_step(pcolStepProps As Collection) As Variant

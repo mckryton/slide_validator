@@ -22,26 +22,19 @@ End Property
 
 Public Sub test_examples()
 
-    Dim examples As Variant
+    Dim examples As Collection
     Dim example As Variant
 
-    examples = Array( _
-                    Array("Rule: add comments to the target slide for every rule violation"), _
-                    Array("Example: slide with violations", _
+    Set examples = New Collection
+    examples.Add Array("Rule: add comments to the target slide for every rule violation")
+    examples.Add Array("Example: slide with violations", _
                             "Given a presentation with one slide", _
                             "And a rule which fails to validate the slide", _
                             "When the presentation is validazed", _
-                            "Then a comment about the violation will be added to the slide" _
-                          ), _
-                    Array("Rule: remove comments from earlier violation"), _
-                    Array("Rule: create a validation summary after validation was finished"), _
-                    Array("Example: summary report with violations"), _
-                    Array("Example: summary report without violations"), _
-                    Array("Example: empty target presentation"), _
-                    Array("Rule: setup errors will shown in the validation summary"), _
-                    Array("Example: no setup errors"), _
-                    Array("Example: setup can't find a rule") _
-                )
+                            "Then a comment about the violation will be added to the slide")
+                            
+    examples.Add Array("Rule: remove comments from earlier violation")
+        
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next
@@ -83,7 +76,7 @@ Private Function raise_step_error(pErrId As Long) As Variant
 End Function
 
 Public Sub before()
-    
+   
     Validator.Log.LogLevel = Validator.Log.LVL_WARNING
 End Sub
 

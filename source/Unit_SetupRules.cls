@@ -29,28 +29,26 @@ End Property
 
 Public Sub test_examples()
 
-    Dim examples As Variant
+    Dim examples As Collection
     Dim example As Variant
 
-    examples = Array( _
-                    Array("Rule: a slide is a rule config slide if it has a title starting with Rule* and contains a table with 3 columns Parameter, Value and Description"), _
-                    Array("Example: complete rule config slide", _
+    Set examples = New Collection
+    examples.Add Array("Rule: a slide is a rule config slide if it has a title starting with Rule* and contains a table with 3 columns Parameter, Value and Description")
+    examples.Add Array("Example: complete rule config slide", _
                            "Given a slide with the title ""Rule: just for test"" and a table with 3 columns ""Parameter,Value,Description""", _
                            "When the slide is tested for being a rule config slide", _
-                           "Then the slide is considered to be a rule config slide" _
-                    ), _
-                    Array("Rule: rules are setup from config slides in SlideValidator, hidden slides are ignored"), _
-                    Array("Rule: the slide title defines which rule object is used for validation"), _
-                    Array("Example: config slide has a matching rule", _
+                           "Then the slide is considered to be a rule config slide")
+    
+    examples.Add Array("Rule: hidden slides are ignored")
+    
+    examples.Add Array("Rule: the slide title defines which rule object is used for validation")
+    examples.Add Array("Example: config slide has a matching rule", _
                             "Given a SlideValidator having a config slide titled ""Permitted Fonts""", _
                             "And a matching Rule named ""Rule_Permitted_Fonts""", _
                             "And a target presentation using Times New Roman for a text", _
                             "When the rules for the next validations are set up", _
-                            "Then the setup contains the rule ""Permitted_Fonts""" _
-                    ) _
-                )
-
-
+                            "Then the setup contains the rule ""Permitted_Fonts""")
+    
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next

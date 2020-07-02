@@ -32,30 +32,29 @@ Public Sub test_examples()
     Dim example As Variant
 
     Set examples = New Collection
-    example = Array("Rule: add a validation comment for every shape using a font not permitted")
-    examples.Add example
-    example = Array("Example: slide with a valid font", _
+    examples.Add Array("Rule: add a validation comment for every shape using a font not permitted")
+
+    examples.Add Array("Example: slide with a valid font", _
                            "Given a new presentation", _
                            "And it contains a slide with a textbox using ""Arial""", _
                            "And Arial is the only permitted font", _
                            "When the ""Permitted_Fonts"" rule is applied to the slide", _
                            "Then no comment is added to the slide")
-    examples.Add example
-    example = Array("Example: slide with an invalid font", _
+    
+    examples.Add Array("Example: slide with an invalid font", _
                            "Given a new presentation", _
                            "And it contains a slide with a textbox named ""fonttest_1"" using ""Times New Roman"" as font", _
                            "And Arial is the only permitted font", _
                            "When the ""Permitted_Fonts"" rule is applied to the slide", _
                            "Then a comment ""illegal font >Times New Roman< in shape fonttest_1"" is added to the slide")
-    examples.Add example
-    example = Array("Example: a shape is using multiple fonts", _
+    
+    examples.Add Array("Example: a shape is using multiple fonts", _
                            "Given Arial is the only permitted font", _
                            "Given a new presentation", _
                            "And a slide with a textbox named ""fonttest_1"" using ""Arial"" for the first word and ""Courier New"" for the second word", _
                            "And Arial is the only permitted font", _
                            "When the ""Permitted_Fonts"" rule is applied to the slide", _
                            "Then a comment ""multiple fonts in shape fonttest_1 detected"" is added to the slide")
-    examples.Add example
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next

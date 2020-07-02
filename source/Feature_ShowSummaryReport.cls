@@ -20,19 +20,22 @@ End Property
 
 Public Sub test_examples()
 
-    Dim examples As Variant
+    Dim examples As Collection
     Dim example As Variant
 
-    examples = Array( _
-                    Array("Rule: create a summary report slide after validation was finished"), _
-                    Array("Example: validation with violations"), _
-                    Array("Example: validation without violations"), _
-                    Array("Example: empty target presentation"), _
-                    Array("Rule: setup errors will shown in the summary report slide"), _
-                    Array("Example: no setup errors"), _
-                    Array("Example: setup can't find a rule"), _
-                    Array("Rule: disable summary by hiding summary config slide") _
-                )
+    Set examples = New Collection
+    examples.Add Array("Rule: create a summary report slide after validation was finished")
+    examples.Add Array("Example: validation with violations")
+    examples.Add Array("Example: validation without violations")
+    examples.Add Array("Example: empty target presentation")
+    
+    examples.Add Array("Rule: setup errors will shown in the summary report slide")
+    examples.Add Array("Example: no setup errors")
+    examples.Add Array("Example: setup can't find a rule")
+    
+    'to be discussed - might be better to disable summary via separate config for SlideValidator
+    examples.Add Array("Rule: disable summary by hiding summary config slide")
+    
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next
