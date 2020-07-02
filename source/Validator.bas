@@ -68,18 +68,17 @@ error_handler:
     Log.log_function_error "Validator.validate_presentation"
 End Sub
 
-Private Function apply_rules_on_slide(pvarRules As Collection, psldCurrentSlide As Slide) As Collection
+Public Function apply_rules_on_slide(pvarRules As Collection, psldCurrentSlide As Slide) As Collection
 
     Dim rule As Variant
     Dim validation_result As String
     Dim violations As Collection
     
-    On Error GoTo error_handler
     Set violations = New Collection
     For Each rule In pvarRules
         validation_result = rule.apply_rule(psldCurrentSlide)
         If Len(Trim(validation_result)) > 0 Then
-           add_violation psldCurrentSlide, validation_result
+           add_violation_comment psldCurrentSlide, validation_result
            violations.Add validation_result
         End If
     Next
@@ -88,13 +87,9 @@ Private Function apply_rules_on_slide(pvarRules As Collection, psldCurrentSlide 
     Else
         Set apply_rules_on_slide = violations
     End If
-    Exit Function
-    
-error_handler:
-    Log.log_function_error "Validator.apply_rules_on_slide"
 End Function
 
-Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As String)
+Public Sub add_violation_comment(psldValidatedSlide As Slide, pstrViolationMessage As String)
     
     Dim lngCommentPosX As Long
     
@@ -105,7 +100,7 @@ Public Sub add_violation(psldValidatedSlide As Slide, pstrViolationMessage As St
     Exit Sub
 
 error_handler:
-    Log.log_function_error "Validator.add_violation"
+    Log.log_function_error "Validator.add_violation_comment"
 End Sub
 
 Private Sub cleanup_violation_comments()

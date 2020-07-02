@@ -93,13 +93,34 @@ Private Function get_config_template_index(pConfigPresentation As Presentation) 
                 Validator.CONFIG_TEMPLATE_NAME & "< in presentation " & pConfigPresentation.Name
 End Function
 
-Public Sub add_slide_with_textbox(pprePresentation As Presentation, pstrFontName As String)
+Public Function add_slide_with_textbox(target_presentation As Presentation, font_name As String, Optional shape_name) As Slide
 
     Dim slide_with_textbox As Slide
     Dim textbox As shape
 
-    Set slide_with_textbox = pprePresentation.Slides.AddSlide(1, pprePresentation.SlideMaster.CustomLayouts(7))
+    Set slide_with_textbox = add_empty_slide(target_presentation)
     Set textbox = slide_with_textbox.Shapes.AddTextbox(msoTextOrientationHorizontal, 200, 200, 400, 200)
-    textbox.TextFrame.TextRange.font.Name = pstrFontName
-    textbox.TextFrame.TextRange.Text = "This text is using " & pstrFontName & " as font."
+    textbox.TextFrame.TextRange.font.Name = font_name
+    textbox.TextFrame.TextRange.Text = "This text is using " & font_name & " as font."
+    If Not IsMissing(shape_name) Then
+        textbox.Name = shape_name
+    End If
+    Set add_slide_with_textbox = slide_with_textbox
+End Function
+
+Public Function add_empty_slide(target_presentation As Presentation) As Slide
+
+    Set add_empty_slide = target_presentation.Slides.AddSlide(1, target_presentation.SlideMaster.CustomLayouts(7))
+End Function
+
+Public Sub close_test_presentations()
+
+    Dim current_pres As Presentation
+    
+    For Each current_pres In Application.Presentations
+        If current_pres.Name <> "SlideValidator.pptm" Then
+            current_pres.Saved = msoTrue
+            current_pres.Close
+        End If
+    Next
 End Sub

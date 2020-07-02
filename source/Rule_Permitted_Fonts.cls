@@ -18,15 +18,15 @@ Private Sub Class_Terminate()
     Set m_rule_config = Nothing
 End Sub
 
-Private Property Get white_list() As Collection
+Public Property Get permitted_fonts() As Collection
 
     Dim fonts As Variant
     Dim font As String
     
     If TypeName(m_permitted_fonts) = "Nothing" Then
-        Set m_permitted_fonts = create_white_list(Me.Config("PermittedFonts"))
+        Set m_permitted_fonts = collect_permitted_fonts(Me.Config("PermittedFonts"))
     End If
-    Set white_list = m_permitted_fonts
+    Set permitted_fonts = m_permitted_fonts
 End Property
 
 Public Function apply_rule(psldCurrentSlide As Slide) As String
@@ -37,26 +37,37 @@ Public Function apply_rule(psldCurrentSlide As Slide) As String
     violations = ""
     For Each shape In psldCurrentSlide.Shapes
         If shape.TextFrame.HasText Then
-            If Not ExtraVBA.existsItem(shape.TextFrame2.TextRange.font.Name, white_list) Then
-                violations = violations & "illegal font >" & shape.TextFrame2.TextRange.font.Name & "< in shape " & shape.Name & vbCrLf
+            If shape.TextFrame.TextRange.font.Name = "" Then
+                violations = add_violation_msg(violations, "multiple fonts in shape " & shape.Name & " detected")
+            ElseIf Not ExtraVBA.existsItem(shape.TextFrame2.TextRange.font.Name, Me.permitted_fonts) Then
+                violations = add_violation_msg(violations, "illegal font >" & shape.TextFrame2.TextRange.font.Name & "< in shape " & shape.Name)
             End If
         End If
     Next
     apply_rule = violations
 End Function
 
-Private Function create_white_list(pWhiteList_Config_String As String) As Collection
+Private Function add_violation_msg(violations As String, new_msg As String) As String
     
-    Dim white_list_config As Variant
+    If violations <> "" Then
+        add_violation_msg = violations & vbLf & new_msg
+    Else
+        add_violation_msg = new_msg
+    End If
+End Function
+
+Private Function collect_permitted_fonts(permitted_fonts_config As String) As Collection
+    
+    Dim permitted_fonts_config_values As Variant
     Dim font_name As Variant
-    Dim new_white_list As Collection
+    Dim permitted_fonts As Collection
     
-    Set new_white_list = New Collection
-    white_list_config = Split(pWhiteList_Config_String, ",")
-    For Each font_name In white_list_config
-        new_white_list.Add Trim(font_name), Trim(font_name)
+    Set permitted_fonts = New Collection
+    permitted_fonts_config_values = Split(permitted_fonts_config, ",")
+    For Each font_name In permitted_fonts_config_values
+        permitted_fonts.Add Trim(font_name), Trim(font_name)
     Next
-    Set create_white_list = new_white_list
+    Set collect_permitted_fonts = permitted_fonts
 End Function
 
 

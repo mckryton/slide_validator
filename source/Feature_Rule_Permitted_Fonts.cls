@@ -15,9 +15,11 @@ Option Explicit
 'separate tags by comma, e.g.: "debug,production"
 Const cTags = "wip"
 
-Dim mLogger As Logger
-Dim mobjRulePermittedFonts As Rule_Permitted_Fonts
-Dim mpreTestPresentation As Presentation
+Dim m_logger As Logger
+Dim m_rule_permitted_fonts As Rule_Permitted_Fonts
+Dim m_test_presentation As Presentation
+Dim m_test_slide As Slide
+
 
 Public Property Get description() As String
 
@@ -26,19 +28,34 @@ End Property
 
 Public Sub test_examples()
 
-    Dim examples As Variant
+    Dim examples As Collection
     Dim example As Variant
 
-    examples = Array( _
-                    Array("Example: one slide with valid and one slide with invalid font", _
-                           "Given Arial is a permitted font", _
-                           "And a new presentation", _
-                           "And it contains a slide with a textbox using Arial", _
-                           "And it contains a slide with a textbox using Times New Roman", _
-                           "When the rule is applied to the presentation", _
-                           "Then a comment about the rule validation is added to the second slide" _
-                        ) _
-                )
+    Set examples = New Collection
+    example = Array("Rule: add a validation comment for every shape using a font not permitted")
+    examples.Add example
+    example = Array("Example: slide with a valid font", _
+                           "Given a new presentation", _
+                           "And it contains a slide with a textbox using ""Arial""", _
+                           "And Arial is the only permitted font", _
+                           "When the ""Permitted_Fonts"" rule is applied to the slide", _
+                           "Then no comment is added to the slide")
+    examples.Add example
+    example = Array("Example: slide with an invalid font", _
+                           "Given a new presentation", _
+                           "And it contains a slide with a textbox named ""fonttest_1"" using ""Times New Roman"" as font", _
+                           "And Arial is the only permitted font", _
+                           "When the ""Permitted_Fonts"" rule is applied to the slide", _
+                           "Then a comment ""illegal font >Times New Roman< in shape fonttest_1"" is added to the slide")
+    examples.Add example
+    example = Array("Example: a shape is using multiple fonts", _
+                           "Given Arial is the only permitted font", _
+                           "Given a new presentation", _
+                           "And a slide with a textbox named ""fonttest_1"" using ""Arial"" for the first word and ""Courier New"" for the second word", _
+                           "And Arial is the only permitted font", _
+                           "When the ""Permitted_Fonts"" rule is applied to the slide", _
+                           "Then a comment ""multiple fonts in shape fonttest_1 detected"" is added to the slide")
+    examples.Add example
     For Each example In examples
         TExampleRunner.run_example example, Me
     Next
@@ -48,33 +65,52 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     
     Dim step_result As String
     Dim rule_config As Collection
-    Dim validation_setup As ValidationSetup
+    Dim textbox As shape
+    Dim rules As Collection
     
     On Error GoTo error_handler
     Select Case pcolStepProps.Item("step_type") & pcolStepProps.Item("line_body")
-        Case "Given Arial is a permitted font"
-            Set mobjRulePermittedFonts = New Rule_Permitted_Fonts
+        Case "Given Arial is the only permitted font"
+            Set m_rule_permitted_fonts = New Rule_Permitted_Fonts
             Set rule_config = New Collection
             rule_config.Add "Arial", "PermittedFonts"
-            mobjRulePermittedFonts.Config = rule_config
+            m_rule_permitted_fonts.Config = rule_config
             
         Case "Given a new presentation"
-            Set mpreTestPresentation = Application.Presentations.Add
+            Set m_test_presentation = Application.Presentations.Add
             
-        Case "Given it contains a slide with a textbox using Arial"
-            TSupport.add_slide_with_textbox mpreTestPresentation, "Arial"
+        Case "Given it contains a slide with a textbox using ""Arial"""
+            Set m_test_slide = TSupport.add_slide_with_textbox(m_test_presentation, "Arial")
             
-        Case "Given it contains a slide with a textbox using Times New Roman"
-            TSupport.add_slide_with_textbox mpreTestPresentation, "Times New Roman"
+        Case "Given it contains a slide with a textbox named ""fonttest_1"" using ""Times New Roman"" as font"
+            Set m_test_slide = TSupport.add_slide_with_textbox(m_test_presentation, "Times New Roman", "fonttest_1")
             
-        Case "When the rule is applied to the presentation"
-            Set validation_setup = New ValidationSetup
-            validation_setup.ActiveRules.Add mobjRulePermittedFonts, "Permitted_Fonts"
-            Validator.validate_presentation mpreTestPresentation, validation_setup, p_silent:=True
+        Case "Given a slide with a textbox named ""fonttest_1"" using ""Arial"" for the first word and ""Courier New"" for the second word"
+            Set m_test_slide = TSupport.add_empty_slide(m_test_presentation)
+            Set textbox = m_test_slide.Shapes.AddTextbox(msoTextOrientationHorizontal, 200, 200, 400, 200)
+            textbox.TextFrame.TextRange.Text = "Arial Helvetica"
+            textbox.TextFrame.TextRange.Words(1, 1).font.Name = "Arial"
+            textbox.TextFrame.TextRange.Words(2, 1).font.Name = "Courier New"
+            textbox.Name = "fonttest_1"
             
-        Case "Then a comment about the rule validation is added to the second slide"
-            TSpec.expect(mpreTestPresentation.Slides(1).Comments.Count).to_be 1
-            TSpec.expect(mpreTestPresentation.Slides(2).Comments.Count).to_be 0
+        Case "When the ""Permitted_Fonts"" rule is applied to the slide"
+            Set rules = New Collection
+            rules.Add m_rule_permitted_fonts
+            Validator.apply_rules_on_slide rules, m_test_slide
+            
+        Case "Then no comment is added to the slide"
+            TSpec.expect(m_test_presentation.Slides(1).Comments.Count).to_be 0
+        
+        Case "Then a comment about the rule validation is added to the slide"
+            TSpec.expect(m_test_presentation.Slides(1).Comments.Count).to_be 1
+        
+        Case "Then a comment ""illegal font >Times New Roman< in shape fonttest_1"" is added to the slide"
+            TSpec.expect(m_test_presentation.Slides(1).Comments.Count).to_be 1
+            TSpec.expect(m_test_presentation.Slides(1).Comments(1).Text).to_be "illegal font >Times New Roman< in shape fonttest_1"
+            
+        Case "Then a comment ""multiple fonts in shape fonttest_1 detected"" is added to the slide"
+            TSpec.expect(m_test_presentation.Slides(1).Comments.Count).to_be 1
+            TSpec.expect(m_test_presentation.Slides(1).Comments(1).Text).to_be "multiple fonts in shape fonttest_1 detected"
             
         Case Else
             Err.raise ERR_ID_STEP_IS_MISSING
@@ -105,8 +141,9 @@ Public Sub before()
 End Sub
 
 Public Sub after()
-    mpreTestPresentation.Saved = msoTrue
-    mpreTestPresentation.Close
+    m_test_presentation.Saved = msoTrue
+    m_test_presentation.Close
+    Set m_test_presentation = Nothing
 End Sub
 
 Public Property Get Tags() As Variant
@@ -119,17 +156,17 @@ End Sub
 
 Private Property Get Log() As Logger
     
-    If TypeName(mLogger) = "Nothing" Then
-        Set mLogger = New Logger
+    If TypeName(m_logger) = "Nothing" Then
+        Set m_logger = New Logger
     End If
-    Set Log = mLogger
+    Set Log = m_logger
 End Property
 
 Public Property Let Log(ByVal pLogger As Logger)
-    Set mLogger = pLogger
+    Set m_logger = pLogger
 End Property
 
 Private Sub Class_Terminate()
-    Set mLogger = Nothing
+    Set m_logger = Nothing
 End Sub
 
