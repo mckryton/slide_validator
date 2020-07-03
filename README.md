@@ -26,7 +26,7 @@ To describe your new rule copy the class [TTemplate](source/TTemplate.cls) and n
 <br>Hint: remove the wip tag from all other features. I might have forgotten to do this. ;-)
 
 #### Register the new feature
-Now open the procedure ```run_acceptance_tests```from the module [Teststart](source/Teststart.bas). Add your feature to the list of test cases by modifying this line:<br>```acceptance_testcases = Array(New Feature_Rule_Permitted_Fonts, New Feature_Rule_<your_rule_name>)```
+Now open the procedure ```run_acceptance_tests```from the module [TestStart](source/TestStart.bas). Add your feature to the list of test cases by modifying this line:<br>```acceptance_testcases = Array(New Feature_Rule_Permitted_Fonts, New Feature_Rule_<your_rule_name>)```
 <br> Open the Immediate Window and enter ```Teststart.run_acceptance_tests "wip"```
 <br> You should see something like <br> MISSING *your first step from the example* <br> Perfect! You are ready to implement the new rule.
 
