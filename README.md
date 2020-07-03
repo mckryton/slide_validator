@@ -22,20 +22,20 @@ Of course you may clone SlideValidator and add your own rules. <br> *Hint: This 
 
 ### Start with an example
 #### Add a new feature
-To describe your new rule copy the class [TTemplate](blob/master/source/TTemplate.cls) and name it Feature_Rule_<*your_rule_name*>. Open the function ```test_examples``` and fill in the examples describing the functionality of your new rule. In the declaration section add the tag "wip" (for work in progress) like this: ```Const cTags = "wip"```
+To describe your new rule copy the class [TTemplate](source/TTemplate.cls) and name it Feature_Rule_<*your_rule_name*>. Open the function ```test_examples``` and fill in the examples describing the functionality of your new rule. In the declaration section add the tag "wip" (for work in progress) like this: ```Const cTags = "wip"```
 <br>Hint: remove the wip tag from all other features. I might have forgotten to do this. ;-)
 
 #### Register the new feature
-Now open the procedure ```run_acceptance_tests```from the module [Teststart](blob/master/source/Teststart.bas). Add your feature to the list of test cases by modifying this line:<br>```acceptance_testcases = Array(New Feature_Rule_Permitted_Fonts, New Feature_Rule_<your_rule_name>)```
+Now open the procedure ```run_acceptance_tests```from the module [Teststart](source/Teststart.bas). Add your feature to the list of test cases by modifying this line:<br>```acceptance_testcases = Array(New Feature_Rule_Permitted_Fonts, New Feature_Rule_<your_rule_name>)```
 <br> Open the Immediate Window and enter ```Teststart.run_acceptance_tests "wip"```
 <br> You should see something like <br> MISSING *your first step from the example* <br> Perfect! You are ready to implement the new rule.
 
 ### Create a rule
 #### Add a new rule class
-At the  moment SlideValidator does not provide a template for rules. So copy the class [Rule_Permitted_Fonts](blob/master/source/Rule_Permitted_Fonts.cls) and name after your new rule. You might already delete the ```collect_permitted_fonts``` function as well as the ```permitted_fonts``` property because both are unique to the permitted_fonts rule.
+At the  moment SlideValidator does not provide a template for rules. So copy the class [Rule_Permitted_Fonts](source/Rule_Permitted_Fonts.cls) and name after your new rule. You might already delete the ```collect_permitted_fonts``` function as well as the ```permitted_fonts``` property because both are unique to the permitted_fonts rule.
 
 #### Register the rule
-To make SlideValidator aware about the new rule add this line <br> ```Public <your_rule_name> As New Rule_<your_rule_name>``` to the [RuleCatalog](blob/master/source/RuleCatalog.cls) class.
+To make SlideValidator aware about the new rule add this line <br> ```Public <your_rule_name> As New Rule_<your_rule_name>``` to the [RuleCatalog](source/RuleCatalog.cls) class.
 
 #### Add a config slide
 SlideValidator applies only those rule with a matching config slide. <br>
@@ -44,6 +44,6 @@ So just copy the config slide for the permitted fonts rule and adapt the title t
 
 ### Implement the rule logic
 #### Make the steps from your examples pass the test
-Finally you are ready to make your rule work! Open the Feature class you have added and go to the ```run_step``` procedure. Add a new case step matching the first step from your example. Look at the same method from the [Feature_Rule_Permitted_Fonts](blob/master/source/Feature_Rule_Permitted_Fonts.cls) class to get an idea how to fill the steps. <br> *Hint: have a look at the [TSupport](blob/master/source/TSupport.bas) module to find some useful helper function for writing tests.*
+Finally you are ready to make your rule work! Open the Feature class you have added and go to the ```run_step``` procedure. Add a new case step matching the first step from your example. Look at the same method from the [Feature_Rule_Permitted_Fonts](source/Feature_Rule_Permitted_Fonts.cls) class to get an idea how to fill the steps. <br> *Hint: have a look at the [TSupport](source/TSupport.bas) module to find some useful helper function for writing tests.*
 
 That's it! After making all your example steps pass your new rule is ready to be applied against your presentations.
