@@ -5,7 +5,7 @@ Attribute VB_Name = "TExampleRunner"
 
 Option Explicit
 
-Dim mLogger As Logger
+Dim mLogger As logger
 Dim mTestStopped As Boolean
 
 Public Sub run_example(pExampleLinesArray As Variant, pTestDefinitionObject As Variant)
@@ -126,10 +126,10 @@ Public Sub pending(pPendingMsg)
     stop_test
 End Sub
 
-Public Property Get Log() As Logger
+Public Property Get Log() As logger
     
     If TypeName(mLogger) = "Nothing" Then
-        Set mLogger = New Logger
+        Set mLogger = New logger
     End If
     Set Log = mLogger
 End Property

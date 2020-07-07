@@ -12,7 +12,6 @@ Option Explicit
 'separate tags by comma, e.g.: "debug,production"
 Const cTags = ""
 
-Dim m_logger As Logger
 Dim m_rule_permitted_fonts As Rule_Permitted_Fonts
 Dim m_test_presentation As Presentation
 Dim m_test_slide As Slide
@@ -73,7 +72,6 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             m_rule_permitted_fonts.Config = rule_config
             
         Case "Given a new presentation"
-            pending "test pending"
             Set m_test_presentation = Application.Presentations.Add
             
         Case "Given it contains a slide with a textbox using ""Arial"""
@@ -116,20 +114,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     Exit Function
 
 error_handler:
-    run_step = raise_step_error(Err.Number)
-End Function
-
-Private Function raise_step_error(pErrId As Long) As Variant
- 
-    TExampleRunner.stop_test
-    Select Case Err.Number
-    Case ERR_ID_STEP_IS_PENDING
-        raise_step_error = Array("PENDING", Err.description)
-    Case ERR_ID_STEP_IS_MISSING
-        raise_step_error = Array("MISSING")
-    Case Else
-        raise_step_error = Array("FAILED", Err.description)
-    End Select
+    run_step = TCase.raise_step_error(Err.Number, Err.description)
 End Function
 
 Public Sub before()
@@ -147,23 +132,12 @@ Public Property Get Tags() As Variant
     Tags = cTags
 End Property
 
-Private Sub pending(pPendingMsg)
-    Err.raise ERR_ID_STEP_IS_PENDING, description:=pPendingMsg
+Private Sub pending(pending_msg)
+    TCase.pending pending_msg
 End Sub
 
-Private Property Get Log() As Logger
+Public Property Get Log() As logger
     
-    If TypeName(m_logger) = "Nothing" Then
-        Set m_logger = New Logger
-    End If
-    Set Log = m_logger
+    Set Log = TCase.Log
 End Property
-
-Public Property Let Log(ByVal pLogger As Logger)
-    Set m_logger = pLogger
-End Property
-
-Private Sub Class_Terminate()
-    Set m_logger = Nothing
-End Sub
 

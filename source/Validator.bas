@@ -12,7 +12,7 @@ Public Const ERR_ID_UNKNOWN_RULE_NAME = vbError + 7050
 Const COMMENT_AUTHOR = "Slide Validator"
 Const COMMENT_INITIALS = "bot"
 
-Dim mLogger As Logger
+Dim mLogger As logger
 
 Public Sub validate_presentation(Optional pTargetPresentation, Optional pValidationSetup, Optional p_silent)
 
@@ -284,10 +284,10 @@ missing_rule:
     Resume Next
 End Function
 
-Public Property Get Log() As Logger
+Public Property Get Log() As logger
     
     If TypeName(mLogger) = "Nothing" Then
-        Set mLogger = New Logger
+        Set mLogger = New logger
     End If
     Set Log = mLogger
 End Property

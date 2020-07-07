@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
-Dim mLogger As Logger
+Dim mLogger As logger
 
 Public Sub run_testcases(pTestCases As Variant, Optional pTags)
     
@@ -60,15 +60,15 @@ error_handler:
     Log.log_function_error "TCaseRunner.run_testcases"
 End Function
 
-Public Property Get Log() As Logger
+Public Property Get Log() As logger
     
     If TypeName(mLogger) = "Nothing" Then
-        Set mLogger = New Logger
+        Set mLogger = New logger
     End If
     Set Log = mLogger
 End Property
 
-Public Property Let Log(ByVal pLogger As Logger)
+Public Property Let Log(ByVal pLogger As logger)
     Set mLogger = pLogger
 End Property
 

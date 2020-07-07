@@ -14,7 +14,6 @@ Const cTags = ""
 
 Const RULE_CFG_SLIDE_IDX = 2
 
-Dim mLogger As Logger
 Dim mSlideValidatorConfig As Presentation
 Dim mConfigSlide As Slide
 Dim mRuleConfig As Collection
@@ -74,20 +73,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     Exit Function
 
 error_handler:
-    run_step = raise_step_error(Err.Number)
-End Function
-
-Private Function raise_step_error(pErrId As Long) As Variant
- 
-    TExampleRunner.stop_test
-    Select Case Err.Number
-    Case ERR_ID_STEP_IS_PENDING
-        raise_step_error = Array("PENDING", Err.description)
-    Case ERR_ID_STEP_IS_MISSING
-        raise_step_error = Array("MISSING")
-    Case Else
-        raise_step_error = Array("FAILED", Err.description)
-    End Select
+    run_step = TCase.raise_step_error(Err.Number, Err.description)
 End Function
 
 Public Sub before()
@@ -106,24 +92,12 @@ Public Property Get Tags() As Variant
     Tags = cTags
 End Property
 
-Private Sub pending(pPendingMsg)
-    Err.raise ERR_ID_STEP_IS_PENDING, description:=pPendingMsg
+Private Sub pending(pending_msg)
+    TCase.pending pending_msg
 End Sub
 
-Private Property Get Log() As Logger
-    
-    If TypeName(mLogger) = "Nothing" Then
-        Set mLogger = New Logger
-    End If
-    Set Log = mLogger
+Public Property Get Log() As logger
+
+    Set Log = TCase.Log
 End Property
-
-Public Property Let Log(ByVal pLogger As Logger)
-    Set mLogger = pLogger
-End Property
-
-
-Private Sub Class_Terminate()
-    Set mLogger = Nothing
-End Sub
 
