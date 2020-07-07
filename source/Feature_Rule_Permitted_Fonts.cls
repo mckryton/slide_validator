@@ -7,13 +7,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-'------------------------------------------------------------------------
-' Description  : Ability apply a white list for fonts
-'------------------------------------------------------------------------
 Option Explicit
 
 'separate tags by comma, e.g.: "debug,production"
-Const cTags = "wip"
+Const cTags = ""
 
 Dim m_logger As Logger
 Dim m_rule_permitted_fonts As Rule_Permitted_Fonts
@@ -76,6 +73,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
             m_rule_permitted_fonts.Config = rule_config
             
         Case "Given a new presentation"
+            pending "test pending"
             Set m_test_presentation = Application.Presentations.Add
             
         Case "Given it contains a slide with a textbox using ""Arial"""
@@ -126,7 +124,7 @@ Private Function raise_step_error(pErrId As Long) As Variant
     TExampleRunner.stop_test
     Select Case Err.Number
     Case ERR_ID_STEP_IS_PENDING
-        raise_step_error = Array("PENDING")
+        raise_step_error = Array("PENDING", Err.description)
     Case ERR_ID_STEP_IS_MISSING
         raise_step_error = Array("MISSING")
     Case Else
@@ -150,7 +148,7 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pPendingMsg)
-    Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+    Err.raise ERR_ID_STEP_IS_PENDING, description:=pPendingMsg
 End Sub
 
 Private Property Get Log() As Logger

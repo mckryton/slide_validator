@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 'separate tags by comma, e.g.: "wip,debug,production"
-Const cTags = ""
+Const cTags = "wip"
 
 Dim mTestPresentation As Presentation
 
@@ -30,7 +30,7 @@ Public Sub test_examples()
     examples.Add Array("Example: slide with violations", _
                             "Given a presentation with one slide", _
                             "And a rule which fails to validate the slide", _
-                            "When the presentation is validazed", _
+                            "When the slide is validated", _
                             "Then a comment about the violation will be added to the slide")
                             
     examples.Add Array("Rule: remove comments from earlier violation")

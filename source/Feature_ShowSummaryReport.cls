@@ -69,7 +69,7 @@ Private Function raise_step_error(pErrId As Long) As Variant
     TExampleRunner.stop_test
     Select Case Err.Number
     Case ERR_ID_STEP_IS_PENDING
-        raise_step_error = Array("PENDING")
+        raise_step_error = Array("PENDING", Err.description)
     Case ERR_ID_STEP_IS_MISSING
         raise_step_error = Array("MISSING")
     Case Else
@@ -91,7 +91,7 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pPendingMsg)
-    Err.raise ERR_ID_STEP_IS_PENDING, description = pPendingMsg
+    Err.raise ERR_ID_STEP_IS_PENDING, description:=pPendingMsg
 End Sub
 
 
