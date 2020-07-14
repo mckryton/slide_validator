@@ -20,10 +20,10 @@ Private Sub exportCode()
     Dim strPath As String
     Dim strSeparator As String
     Dim strSuffix As String
-    Dim export_logger As Logger
+    Dim export_logger As logger
 
     On Error GoTo error_handler
-    Set export_logger = New Logger
+    Set export_logger = New logger
     #If MAC_OFFICE_VERSION >= 15 Then
         'in Office 2016 MAC M$ switched to / as path separator
         strSeparator = "/"

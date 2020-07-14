@@ -114,7 +114,7 @@ Public Function run_step(pcolStepProps As Collection) As Variant
     Exit Function
 
 error_handler:
-    run_step = TCase.raise_step_error(Err.Number, Err.description)
+    run_step = TFeature.raise_step_error(Err.Number, Err.description)
 End Function
 
 Public Sub before()
@@ -133,11 +133,11 @@ Public Property Get Tags() As Variant
 End Property
 
 Private Sub pending(pending_msg)
-    TCase.pending pending_msg
+    TFeature.pending pending_msg
 End Sub
 
 Public Property Get Log() As logger
     
-    Set Log = TCase.Log
+    Set Log = TFeature.Log
 End Property
 

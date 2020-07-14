@@ -1,4 +1,4 @@
-Attribute VB_Name = "TCase"
+Attribute VB_Name = "TFeature"
 Option Explicit
 
 Dim m_Logger As logger
